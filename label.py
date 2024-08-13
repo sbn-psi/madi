@@ -18,10 +18,9 @@ def extract_collection(collection: bs4.Tag) -> ProductLabel:
     """
     return ProductLabel(
         identification_area=extract_identification_area(collection.Identification_Area),
-        context_area=extract_context_area(collection.Context_Area)
+        context_area=extract_context_area(collection.Context_Area),
+        file_area=extract_file_area(collection.File_Area_Inventory)
     )
-
-
 
 
 def extract_bundle(bundle: bs4.Tag) -> ProductLabel:
@@ -255,6 +254,7 @@ def extract_bundle_member_entry(bundle_member_entry: bs4.Tag) -> BundleMemberEnt
         elemstr(bundle_member_entry.lid_reference),
         elemstr(bundle_member_entry.lidvid_reference)
     )
+
 
 
 
