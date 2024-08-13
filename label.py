@@ -9,7 +9,7 @@ import bs4
 from pds4types import DocumentFile, DocumentEdition, Document, SoftwareProgram, Software, Process, \
     ProcessingInformation, DisciplineArea, FileArea, TimeCoordinates, ContextArea, ModificationDetail, \
     ModificationHistory, IdentificationArea, ProductLabel, CollectionLabel, ObservingSystem, ObservingSystemComponent, \
-    InternalReference
+    InternalReference, BundleMemberEntry
 
 
 def extract_collection(collection: bs4.Tag) -> ProductLabel:
@@ -22,13 +22,16 @@ def extract_collection(collection: bs4.Tag) -> ProductLabel:
     )
 
 
+
+
 def extract_bundle(bundle: bs4.Tag) -> ProductLabel:
     """
     Extracts keywords from the Product_Bundle element
     """
     return ProductLabel(
         identification_area=extract_identification_area(bundle.Identification_Area),
-        context_area=extract_context_area(bundle.Context_Area)
+        context_area=extract_context_area(bundle.Context_Area),
+        bundle_member_entries=[extract_bundle_member_entry(x) for x in bundle.find_all("Bundle_Member_Entry")]
     )
 
 
@@ -243,6 +246,16 @@ def extract_document_file(document_file: bs4.Tag) -> DocumentFile:
     Extracts keywords form the Document_File element
     """
     return DocumentFile(elemstr(document_file.file_name))
+
+
+def extract_bundle_member_entry(bundle_member_entry: bs4.Tag) -> BundleMemberEntry:
+    return BundleMemberEntry(
+        elemstr(bundle_member_entry.member_status),
+        elemstr(bundle_member_entry.reference_type),
+        elemstr(bundle_member_entry.lid_reference),
+        elemstr(bundle_member_entry.lidvid_reference)
+    )
+
 
 
 def optstr(value: str, default: str = None) -> str:

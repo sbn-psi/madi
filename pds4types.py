@@ -1,6 +1,6 @@
 import itertools
 from dataclasses import dataclass
-from typing import Optional, Iterable
+from typing import Optional, Iterable, List
 
 
 @dataclass()
@@ -115,6 +115,13 @@ class IdentificationArea:
     minor: int
     modification_history: ModificationHistory
 
+@dataclass()
+class BundleMemberEntry:
+    member_status: str
+    reference_type: str
+    lid_reference: str = None
+    livdid_reference: str = None
+
 
 @dataclass()
 class ProductLabel:
@@ -123,9 +130,13 @@ class ProductLabel:
     context_area: Optional[ContextArea] = None
     discipline_area: Optional[DisciplineArea] = None
     document: Optional[Document] = None
+    bundle_member_entries: List[BundleMemberEntry] = None
 
 
 @dataclass()
 class CollectionLabel:
     identification_area: IdentificationArea
     context_area: ContextArea
+
+
+
