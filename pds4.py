@@ -93,34 +93,34 @@ class CollectionInfo:
 
 
 class CollectionInventory:
-    def __init__(self, primary: set[ProductInfo], secondary: set[ProductInfo]):
-        self.primary = dict((x.lidvid.lid, x) for x in primary)
-        self.secondary = dict((x.lidvid.lid, x) for x in secondary)
+    def __init__(self, primary: set[LidVid], secondary: set[LidVid]):
+        self.primary = dict((x.lid, x) for x in primary)
+        self.secondary = dict((x.lid, x) for x in secondary)
 
-        if any(x.lidvid.lid in primary for x in secondary):
+        if any(x.lid in primary for x in secondary):
             raise Exception("Some products exist in both primary and secondary collections")
 
-    def add_primary(self, product: ProductInfo):
-        lid = product.lidvid.lid
+    def add_primary(self, lidvid: LidVid):
+        lid = lidvid.lid
         if lid in self.secondary:
             raise Exception("Product already exists as a secondary member and can't be made primary")
         if lid in self.primary:
             previous = self.primary[lid]
-            if previous.lidvid.vid >= product.lidvid.vid:
+            if previous.vid >= lidvid.vid:
                 raise Exception("Product is not newer than the version that already exists in the inventory")
-        self.primary[lid] = product
+        self.primary[lid] = lidvid
 
-    def add_secondary(self, product: ProductInfo):
-        lid = product.lidvid.lid
+    def add_secondary(self, lidvid: LidVid):
+        lid = lidvid.lid
         if lid in self.primary:
             raise Exception("Product already exists as a primary member and can't be made secondary")
         if lid in self.secondary:
             previous = self.secondary[lid]
-            if previous.lidvid.vid >= product.lidvid.vid:
+            if lidvid.vid >= lidvid.vid:
                 raise Exception("Product is not newer than the version that already exists in the inventory")
-        self.secondary[lid] = product
+        self.secondary[lid] = lidvid
 
-    def products(self) -> set[ProductInfo]:
+    def products(self) -> set[LidVid]:
         return set(itertools.chain(self.primary.values(), self.secondary.values()))
 
     @staticmethod
