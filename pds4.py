@@ -1,23 +1,48 @@
+from dataclasses import dataclass
 from typing import Optional, Iterable, Dict, Tuple
 import itertools
 import functools
 
 import label
 
+
+@dataclass()
 class Lid:
-    def __init__(self, component: str, parent: Optional[str] = None):
-        self.component = component
-        self.parent = parent
+    prefix: str
+    bundle: str
+    collection: str = None
+    product: str = None
 
-    def fmt(self) -> str:
-        return f'{self.parent}:{self.component}' if self.parent else self.component
+    @staticmethod
+    def parse(lid: str) -> "Lid":
+        tokens = lid.split(":")
+        return Lid(
+            prefix=":".join(tokens[0:3]),
+            bundle=tokens[3],
+            collection=tokens[4] if len(tokens) >= 5 else None,
+            product=tokens[5] if len(tokens) >= 6 else None
+        )
+
+    def fmt(self):
+        if self.product and self.collection:
+            return f"{self.prefix}:{self.bundle}:{self.collection}:{self.product}"
+        if self.collection:
+            return f"{self.prefix}:{self.bundle}:{self.collection}"
+        return f"{self.prefix}:{self.bundle}"
 
 
-@functools.total_ordering
+@dataclass(order=True)
 class Vid:
-    def __init__(self, major: int, minor: int):
-        self.major = major
-        self.minor = minor
+    major: int
+    minor: int
+
+    @staticmethod
+    def parse(vid):
+        tokens = vid.split(".")
+        return Vid(
+            major=int(tokens[0]),
+            minor=int(tokens[1])
+        )
 
     def fmt(self) -> str:
         return f'{self.major}.{self.minor}'
@@ -28,25 +53,21 @@ class Vid:
     def inc_minor(self) -> 'Vid':
         return Vid(self.major, self.minor + 1)
 
-    @staticmethod
-    def _is_valid_operand(other):
-        return hasattr(other, "major") and hasattr(other, "minor")
 
-    def __eq__(self, other):
-        if not Vid._is_valid_operand(other):
-            return NotImplemented
-        return (self.major, self.minor) == (other.major, other.minor)
-
-    def __ge__(self, other):
-        if not Vid._is_valid_operand(other):
-            return NotImplemented
-        return (self.major, self.minor) >= (other.major, other.minor)
-
-
+@dataclass()
 class LidVid:
-    def __init__(self, lid: Lid, vid: Vid):
-        self.lid = lid
-        self.vid = vid
+    lid: Lid
+    vid: Vid
+    @staticmethod
+    def parse(lidvid):
+        tokens = lidvid.split("::")
+        return LidVid(
+            lid=Lid.parse(tokens[0]),
+            vid=Vid.parse(tokens[1])
+        )
+
+    def fmt(self):
+        return f'{self.lid.fmt()}::{self.vid.fmt()}'
 
 
 class ProductInfo:
@@ -101,6 +122,10 @@ class CollectionInventory:
 
     def products(self) -> set[ProductInfo]:
         return set(itertools.chain(self.primary.values(), self.secondary.values()))
+
+    @staticmethod
+    def from_csv(csvdata) -> "CollectionInventory":
+        pass
 
 
 class BundleInfo:
