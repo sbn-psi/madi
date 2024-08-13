@@ -4,8 +4,12 @@ from typing import Iterable
 import bs4
 import requests
 
+import pds4
 from label import ProductLabel
 import product
+from pds4 import CollectionInventory
+
+
 class ArchiveDir:
     def __init__(self, url: str, files: Iterable[str], dirs: Iterable["ArchiveDir"]):
         self.url = url
@@ -40,6 +44,16 @@ def fetchlabel(url) -> ProductLabel:
         return product.extract_label(soup, url)
 
     raise Exception("Could not reach url: " + url)
+
+
+def fetchinventory(url) -> CollectionInventory:
+    r = requests.get(url)
+    if r.status_code == 200:
+        return CollectionInventory.from_csv(r.text)
+
+    raise Exception("Could not reach url: " + url)
+
+
 
 
 def make_absolute(base: str, candidate: str) -> str:
