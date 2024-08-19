@@ -1,7 +1,7 @@
 import pds4
 import label
 import pds4types
-from typing import Dict
+from typing import Dict, Set
 
 
 def check_collection_increment(previous: pds4.CollectionInventory, next: pds4.CollectionInventory):
@@ -48,3 +48,9 @@ def check_for_modification_history(previous: label.ProductLabel, next: label.Pro
                 raise Exception(f'{next_lidvid} has a mismatched modification detail from {prev_lidvid}. The old modification detail was {previous_detail}, and the new one was {next_detail}')
     else:
         raise Exception(f"{next_lidvid} must contain one more modification detail than {prev_lidvid}")
+
+def check_bundle_for_latest_collections(bundle: pds4types.ProductLabel, collection_lidvids: Set[pds4.LidVid]):
+    bundle_member_lidvids = set(e.livdid_reference for e in bundle.bundle_member_entries)
+    bundle_lidvid = bundle.identification_area.lidvid
+    if not collection_lidvids == bundle_member_lidvids:
+        raise Exception(f"{}")
