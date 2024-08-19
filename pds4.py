@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional, Iterable, Dict, Tuple
 import itertools
-import functools
+import csv
 
 import label
 
 
-@dataclass()
+@dataclass(frozen=True)
 class Lid:
     prefix: str
     bundle: str
@@ -31,7 +31,7 @@ class Lid:
         return f"{self.prefix}:{self.bundle}"
 
 
-@dataclass(order=True)
+@dataclass(frozen=True, order=True)
 class Vid:
     major: int
     minor: int
@@ -54,7 +54,7 @@ class Vid:
         return Vid(self.major, self.minor + 1)
 
 
-@dataclass()
+@dataclass(frozen=True)
 class LidVid:
     lid: Lid
     vid: Vid
@@ -93,11 +93,11 @@ class CollectionInfo:
 
 
 class CollectionInventory:
-    def __init__(self, primary: set[LidVid], secondary: set[LidVid]):
-        self.primary = dict((x.lid, x) for x in primary)
-        self.secondary = dict((x.lid, x) for x in secondary)
+    def __init__(self, primary: set[LidVid] = None, secondary: set[LidVid] = None):
+        self.primary = dict((x.lid, x) for x in primary) if primary is not None else {}
+        self.secondary = dict((x.lid, x) for x in secondary) if primary is not None else {}
 
-        if any(x.lid in primary for x in secondary):
+        if any(x in self.primary.keys() for x in self.secondary.keys()):
             raise Exception("Some products exist in both primary and secondary collections")
 
     def add_primary(self, lidvid: LidVid):
@@ -125,7 +125,23 @@ class CollectionInventory:
 
     @staticmethod
     def from_csv(csvdata) -> "CollectionInventory":
-        pass
+        inventory = CollectionInventory()
+        reader = csv.DictReader(csvdata.split("\r\n"), fieldnames=['status', 'lidvid'])
+        for line in reader:
+            status = line["status"]
+            lidvid = LidVid.parse(line["lidvid"])
+            if status == "P":
+                inventory.add_primary(lidvid)
+            else:
+                inventory.add_secondary(lidvid)
+        return inventory
+
+    def ingest_new_inventory(self, new_inventory: "CollectionInventory"):
+        for lidvid in new_inventory.primary.values():
+            self.add_primary(lidvid)
+        for lidvid in new_inventory.secondary.values():
+            self.add_secondary(lidvid)
+
 
 
 class BundleInfo:
