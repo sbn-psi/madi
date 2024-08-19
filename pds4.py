@@ -23,7 +23,7 @@ class Lid:
             product=tokens[5] if len(tokens) >= 6 else None
         )
 
-    def __repr__(self):
+    def __str__(self):
         if self.product and self.collection:
             return f"{self.prefix}:{self.bundle}:{self.collection}:{self.product}"
         if self.collection:
@@ -44,7 +44,7 @@ class Vid:
             minor=int(tokens[1])
         )
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f'{self.major}.{self.minor}'
 
     def inc_major(self) -> 'Vid':
@@ -66,7 +66,7 @@ class LidVid:
             vid=Vid.parse(tokens[1])
         )
 
-    def __repr__(self):
+    def __str__(self):
         return f'{self.lid}::{self.vid}'
 
     def inc_major(self) -> "LidVid":
