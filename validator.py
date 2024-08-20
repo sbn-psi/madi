@@ -45,7 +45,8 @@ def check_for_modification_history(previous: label.ProductLabel, next: label.Pro
             previous_detail, next_detail = pair
 
             if not previous_detail == next_detail:
-                raise Exception(f'{next_lidvid} has a mismatched modification detail from {prev_lidvid}. The old modification detail was {previous_detail}, and the new one was {next_detail}')
+                raise Exception(f'{next_lidvid} has a mismatched modification detail from {prev_lidvid}. '
+                                f'The old modification detail was {previous_detail}, and the new one was {next_detail}')
     else:
         raise Exception(f"{next_lidvid} must contain one more modification detail than {prev_lidvid}")
 
