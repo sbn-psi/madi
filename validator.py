@@ -18,6 +18,11 @@ def _check_dict_increment(previous: Dict[pds4.Lid, pds4.LidVid], next: Dict[pds4
             if lidvid not in allowed:
                 raise Exception(f"Invalid lidvid: {lidvid}. Must be one of {allowed}")
 
+def check_collection_duplicates(previous: pds4.CollectionInventory, next: pds4.CollectionInventory):
+    duplicates = next.products().intersection(previous.products())
+    if len(duplicates):
+        raise Exception(f'Collection had duplicate products: {", ".join(x.__str__() for x in duplicates)}')
+
 
 def check_for_modification_history(lbl: label.ProductLabel):
     lidvid = pds4.LidVid.parse(lbl.identification_area.lidvid)
