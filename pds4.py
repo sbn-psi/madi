@@ -4,6 +4,7 @@ import itertools
 import csv
 
 import label
+import pds4types
 
 
 @dataclass(frozen=True)
@@ -83,19 +84,16 @@ class ProductInfo:
         self.lbl = lbl
 
 
-class CollectionInfo:
-    def __init__(self, lidvid: LidVid, products: set[ProductInfo]):
-        self.lidvid = lidvid
-        self.lids = dict((x.lidvid.lid, x) for x in products)
-
-    def lookup_product(self, lid: Lid) -> ProductInfo:
-        return self.lids.get(lid)
-
-    def add_product(self, product: ProductInfo):
-        self.lids[product.lidvid.lid] = product
-
-    def products(self) -> Iterable[ProductInfo]:
-        return self.lids.values()
+class Collection:
+    def __init__(self,
+                 collection_label: pds4types.ProductLabel,
+                 inventory: "CollectionInventory",
+                 label_url: str = None,
+                 inventory_url: str = None):
+        self.label = collection_label
+        self.inventory = inventory
+        self.label_url = label_url
+        self.inventory_url = inventory_url
 
 
 class CollectionInventory:

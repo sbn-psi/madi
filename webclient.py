@@ -1,4 +1,5 @@
 import itertools
+import os
 from typing import Iterable
 
 import bs4
@@ -54,6 +55,11 @@ def fetchinventory(url) -> CollectionInventory:
     raise Exception("Could not reach url: " + url)
 
 
+def fetchcollection(label_url) -> pds4.Collection:
+    collection_label = fetchlabel(label_url)
+    inventory_url = os.path.join(os.path.dirname(label_url), collection_label.file_area.file_name)
+    inventory = fetchinventory(inventory_url)
+    return pds4.Collection(collection_label, inventory, label_url, inventory_url)
 
 
 def make_absolute(base: str, candidate: str) -> str:
