@@ -19,8 +19,11 @@ def main():
         collection_url = os.path.join(os.path.dirname(url), label.file_area.file_name)
         inventory = webclient.fetchinventory(collection_url)
         for p in inventory.products():
-            print(p.fmt())
+            print(p.__str__())
 
+
+def is_basic(x):
+    return not (is_collection(x) or is_bundle(x))
 
 
 def is_collection(x):
