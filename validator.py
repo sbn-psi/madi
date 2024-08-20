@@ -56,7 +56,7 @@ def check_for_modification_history(lbl: label.ProductLabel):
         raise Exception(f'{lidvid} does not have a current modification history. Versions seen were: {versions}')
 
 
-def check_for_modification_history(previous: label.ProductLabel, next: label.ProductLabel):
+def check_for_preserved_modification_history(previous: label.ProductLabel, next: label.ProductLabel):
     previous_details = previous.identification_area.modification_history.modification_details
     next_details = next.identification_area.modification_history.modification_details
 
