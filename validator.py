@@ -18,6 +18,27 @@ def _check_dict_increment(previous: Dict[pds4.Lid, pds4.LidVid], next: Dict[pds4
             if lidvid not in allowed:
                 raise Exception(f"Invalid lidvid: {lidvid}. Must be one of {allowed}")
 
+
+def check_bundle_increment(previous: label.ProductLabel, next: label.ProductLabel):
+    previous_lidvids = [pds4.LidVid(x.livdid_reference) for x in  previous.bundle_member_entries]
+    next_lidvids = [pds4.LidVid(x.livdid_reference) for x in next.bundle_member_entries]
+
+    for next_lidvid in next_lidvids:
+        matching_lidvids = [x for x in previous_lidvids if x.lid == next_lidvid.lid]
+        if len(matching_lidvids):
+            matching_lidvid = matching_lidvids[0]
+            allowed = (matching_lidvid.inc_minor(), matching_lidvid.inc_minor())
+            if next_lidvid not in allowed:
+                raise Exception(f"Invalid lidvid: {next_lidvid}. Must be one of {allowed}")
+        else:
+            raise Exception(f"{next_lidvid} does not have a corresponding LidVid in the previous collection")
+
+    for previous_lidvid in previous_lidvids:
+        matching_lidvids = [x for x in previous_lidvids if x.lid == previous_lidvid.lid]
+        if not len(matching_lidvids):
+            raise Exception(f"{previous_lidvid} does not have a corresponding LidVid in the new collection")
+
+
 def check_collection_duplicates(previous: pds4.CollectionInventory, next: pds4.CollectionInventory):
     duplicates = next.products().intersection(previous.products())
     if len(duplicates):
