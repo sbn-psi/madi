@@ -59,4 +59,4 @@ def check_bundle_for_latest_collections(bundle: pds4types.ProductLabel, collecti
     bundle_member_lidvids = set(e.livdid_reference for e in bundle.bundle_member_entries)
     bundle_lidvid = bundle.identification_area.lidvid
     if not collection_lidvids == bundle_member_lidvids:
-        raise Exception(f"{}")
+        raise Exception(f"{bundle_lidvid} does not contain the expected collection list: {','.join(x.__str__() for x in collection_lidvids)}")
