@@ -4,24 +4,24 @@ import pds4types
 from typing import Dict, Set
 
 
-def check_collection_increment(previous: pds4.CollectionInventory, next: pds4.CollectionInventory):
-    _check_dict_increment(previous.primary, next.primary)
-    _check_dict_increment(previous.secondary, next.secondary)
+def check_collection_increment(previous_collection: pds4.CollectionInventory, next_collection: pds4.CollectionInventory):
+    _check_dict_increment(previous_collection.primary, next_collection.primary)
+    _check_dict_increment(previous_collection.secondary, next_collection.secondary)
 
 
-def _check_dict_increment(previous: Dict[pds4.Lid, pds4.LidVid], next: Dict[pds4.Lid, pds4.LidVid]):
-    for lid in next.keys():
-        if lid in previous.keys():
-            lidvid: pds4.LidVid = next[lid]
-            previous_lidvid: pds4.LidVid = previous[lid]
+def _check_dict_increment(previous_lidvids: Dict[pds4.Lid, pds4.LidVid], next_lidvids: Dict[pds4.Lid, pds4.LidVid]):
+    for lid in next_lidvids.keys():
+        if lid in previous_lidvids.keys():
+            lidvid: pds4.LidVid = next_lidvids[lid]
+            previous_lidvid: pds4.LidVid = previous_lidvids[lid]
             allowed = (previous_lidvid.inc_major(), previous_lidvid.inc_minor())
             if lidvid not in allowed:
                 raise Exception(f"Invalid lidvid: {lidvid}. Must be one of {allowed}")
 
 
-def check_bundle_increment(previous: label.ProductLabel, next: label.ProductLabel):
-    previous_lidvids = [pds4.LidVid(x.livdid_reference) for x in  previous.bundle_member_entries]
-    next_lidvids = [pds4.LidVid(x.livdid_reference) for x in next.bundle_member_entries]
+def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: label.ProductLabel):
+    previous_lidvids = [pds4.LidVid(x.livdid_reference) for x in previous_bundle.bundle_member_entries]
+    next_lidvids = [pds4.LidVid(x.livdid_reference) for x in next_bundle.bundle_member_entries]
 
     for next_lidvid in next_lidvids:
         matching_lidvids = [x for x in previous_lidvids if x.lid == next_lidvid.lid]
