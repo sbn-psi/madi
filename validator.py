@@ -4,7 +4,8 @@ import pds4types
 from typing import Dict, Set
 
 
-def check_collection_increment(previous_collection: pds4.CollectionInventory, next_collection: pds4.CollectionInventory):
+def check_collection_increment(previous_collection: pds4.CollectionInventory,
+                               next_collection: pds4.CollectionInventory):
     _check_dict_increment(previous_collection.primary, next_collection.primary)
     _check_dict_increment(previous_collection.secondary, next_collection.secondary)
 
@@ -39,8 +40,9 @@ def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: lab
             raise Exception(f"{previous_lidvid} does not have a corresponding LidVid in the new collection")
 
 
-def check_collection_duplicates(previous: pds4.CollectionInventory, next: pds4.CollectionInventory):
-    duplicates = next.products().intersection(previous.products())
+def check_collection_duplicates(previous_collection: pds4.CollectionInventory,
+                                next_collection: pds4.CollectionInventory):
+    duplicates = next_collection.products().intersection(previous_collection.products())
     if len(duplicates):
         raise Exception(f'Collection had duplicate products: {", ".join(x.__str__() for x in duplicates)}')
 
@@ -56,12 +58,13 @@ def check_for_modification_history(lbl: label.ProductLabel):
         raise Exception(f'{lidvid} does not have a current modification history. Versions seen were: {versions}')
 
 
-def check_for_preserved_modification_history(previous: label.ProductLabel, next: label.ProductLabel):
-    previous_details = previous.identification_area.modification_history.modification_details
-    next_details = next.identification_area.modification_history.modification_details
+def check_for_preserved_modification_history(previous_collection: label.ProductLabel,
+                                             next_collection: label.ProductLabel):
+    previous_details = previous_collection.identification_area.modification_history.modification_details
+    next_details = next_collection.identification_area.modification_history.modification_details
 
-    next_lidvid = next.identification_area.lidvid
-    prev_lidvid = previous.identification_area.lidvid
+    next_lidvid = next_collection.identification_area.lidvid
+    prev_lidvid = previous_collection.identification_area.lidvid
 
     if len(next_details) == len(previous_details) + 1:
         pairs = zip(previous_details, next_details[:len(previous_details)])
@@ -81,4 +84,5 @@ def check_bundle_for_latest_collections(bundle: pds4types.ProductLabel, collecti
     bundle_member_lidvids = set(e.livdid_reference for e in bundle.bundle_member_entries)
     bundle_lidvid = bundle.identification_area.lidvid
     if not collection_lidvids == bundle_member_lidvids:
-        raise Exception(f"{bundle_lidvid} does not contain the expected collection list: {','.join(x.__str__() for x in collection_lidvids)}")
+        raise Exception(f"{bundle_lidvid} does not contain the expected collection list: "
+                        f"{','.join(x.__str__() for x in collection_lidvids)}")
