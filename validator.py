@@ -20,8 +20,8 @@ def _check_dict_increment(previous_lidvids: Dict[pds4.Lid, pds4.LidVid], next_li
 
 
 def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: label.ProductLabel):
-    previous_lidvids = [pds4.LidVid(x.livdid_reference) for x in previous_bundle.bundle_member_entries]
-    next_lidvids = [pds4.LidVid(x.livdid_reference) for x in next_bundle.bundle_member_entries]
+    previous_lidvids = [pds4.LidVid.parse(x.livdid_reference) for x in previous_bundle.bundle_member_entries]
+    next_lidvids = [pds4.LidVid.parse(x.livdid_reference) for x in next_bundle.bundle_member_entries]
 
     for next_lidvid in next_lidvids:
         matching_lidvids = [x for x in previous_lidvids if x.lid == next_lidvid.lid]
@@ -75,6 +75,7 @@ def check_for_modification_history(previous: label.ProductLabel, next: label.Pro
                                 f'The old modification detail was {previous_detail}, and the new one was {next_detail}')
     else:
         raise Exception(f"{next_lidvid} must contain one more modification detail than {prev_lidvid}")
+
 
 def check_bundle_for_latest_collections(bundle: pds4types.ProductLabel, collection_lidvids: Set[pds4.LidVid]):
     bundle_member_lidvids = set(e.livdid_reference for e in bundle.bundle_member_entries)
