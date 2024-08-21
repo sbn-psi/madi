@@ -66,6 +66,10 @@ def fetchbundle(label_url) -> pds4.Bundle:
     bundle_label = fetchlabel(label_url)
     return pds4.Bundle(bundle_label, label_url)
 
+def fetchproduct(label_url) -> pds4.ProductInfo:
+    product_label = fetchlabel(label_url)
+    data_urls = [os.path.join(os.path.dirname(label_url), product_label.file_area.file_name)]
+    return pds4.ProductInfo(product_label, label_url, data_urls)
 
 def make_absolute(base: str, candidate: str) -> str:
     if candidate.startswith(base):

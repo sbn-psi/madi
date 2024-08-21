@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Iterable, Dict, Tuple
+from typing import Optional, Iterable, Dict, Tuple, List
 import itertools
 import csv
 
@@ -78,10 +78,10 @@ class LidVid:
 
 
 class ProductInfo:
-    def __init__(self, lidvid: LidVid, path: str, lbl: label.ProductLabel):
-        self.lidvid: LidVid = lidvid
-        self.path = path
+    def __init__(self, lbl: label.ProductLabel, label_url: str = None, data_urls: List[str] = None):
         self.lbl = lbl
+        self.label_url = label_url
+        self.data_urls = data_urls
 
 
 class Collection:

@@ -13,6 +13,7 @@ def main():
 
     collections = [webclient.fetchcollection(url) for url in collection_urls]
     bundles = [webclient.fetchbundle(url) for url in bundle_urls]
+    products = [webclient.fetchproduct(url) for url in product_urls]
 
 
 def is_basic(x):
