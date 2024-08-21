@@ -12,9 +12,7 @@ def main():
     collection_urls = [x for x in label_urls if is_collection(x)]
 
     collections = [webclient.fetchcollection(url) for url in collection_urls]
-
-    for url in bundle_urls:
-        bundle_label = webclient.fetchlabel(url)
+    bundles = [webclient.fetchbundle(url) for url in bundle_urls]
 
 
 def is_basic(x):

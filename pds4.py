@@ -147,8 +147,7 @@ class CollectionInventory:
             self.add_secondary(lidvid)
 
 
-
-class BundleInfo:
-    def __init__(self, lidvid: LidVid, collections: set[LidVid]):
-        self.lidvid = lidvid
-        self.collections = collections
+class Bundle:
+    def __init__(self, bundle_label: pds4types.ProductLabel, url: str = None):
+        self.label = bundle_label
+        self.url = url

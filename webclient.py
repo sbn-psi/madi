@@ -62,6 +62,11 @@ def fetchcollection(label_url) -> pds4.Collection:
     return pds4.Collection(collection_label, inventory, label_url, inventory_url)
 
 
+def fetchbundle(label_url) -> pds4.Bundle:
+    bundle_label = fetchlabel(label_url)
+    return pds4.Bundle(bundle_label, label_url)
+
+
 def make_absolute(base: str, candidate: str) -> str:
     if candidate.startswith(base):
         return candidate
