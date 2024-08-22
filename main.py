@@ -15,6 +15,9 @@ def main():
     bundles = [webclient.fetchbundle(url) for url in bundle_urls]
     products = [webclient.fetchproduct(url) for url in product_urls]
 
+    for b in bundles:
+        print(webclient.remote_checksum(b.url))
+        print(b.label.checksum)
 
 def is_basic(x):
     return not (is_collection(x) or is_bundle(x))

@@ -1,6 +1,8 @@
 import itertools
 import os
 from typing import Iterable
+from functools import cache
+import hashlib
 
 import bs4
 import requests
@@ -41,8 +43,10 @@ def fetchdir(url) -> ArchiveDir:
 def fetchlabel(url) -> ProductLabel:
     r = requests.get(url)
     if r.status_code == 200:
-        soup = bs4.BeautifulSoup(r.text, "lxml-xml")
-        return product.extract_label(soup, url)
+        text = r.text
+        checksum = hashlib.md5(text.encode('utf-8')).hexdigest()
+        soup = bs4.BeautifulSoup(text, "lxml-xml")
+        return product.extract_label(soup, checksum, url)
 
     raise Exception("Could not reach url: " + url)
 
@@ -74,6 +78,17 @@ def fetchproduct(label_url) -> pds4.ProductInfo:
     data_urls = rebase_filenames(basepath, [product_label.file_area.file_name]) if product_label.file_area else []
     document_urls = rebase_filenames(basepath, product_label.document.filenames()) if product_label.document else []
     return pds4.ProductInfo(product_label, label_url, data_urls + document_urls)
+
+
+@cache
+def remote_checksum(url: str) -> str:
+    r = requests.get(url)
+    if r.status_code == 200:
+        m = hashlib.md5()
+        for c in r.iter_content(chunk_size=4096):
+            m.update(c)
+        return m.hexdigest()
+    raise Exception("Could not reach url: " + url)
 
 
 def rebase_filenames(basepath, filenames):

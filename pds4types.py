@@ -125,6 +125,7 @@ class BundleMemberEntry:
 
 @dataclass()
 class ProductLabel:
+    checksum: str = None
     identification_area: IdentificationArea = None
     file_area: Optional[FileArea] = None
     context_area: Optional[ContextArea] = None

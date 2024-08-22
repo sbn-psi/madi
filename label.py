@@ -12,33 +12,36 @@ from pds4types import DocumentFile, DocumentEdition, Document, SoftwareProgram, 
     InternalReference, BundleMemberEntry
 
 
-def extract_collection(collection: bs4.Tag) -> ProductLabel:
+def extract_collection(collection: bs4.Tag, checksum: str) -> ProductLabel:
     """
     Extracts keywords from the Product_Collection element
     """
     return ProductLabel(
+        checksum=checksum,
         identification_area=extract_identification_area(collection.Identification_Area),
         context_area=extract_context_area(collection.Context_Area),
         file_area=extract_file_area(collection.File_Area_Inventory)
     )
 
 
-def extract_bundle(bundle: bs4.Tag) -> ProductLabel:
+def extract_bundle(bundle: bs4.Tag, checksum: str) -> ProductLabel:
     """
     Extracts keywords from the Product_Bundle element
     """
     return ProductLabel(
+        checksum=checksum,
         identification_area=extract_identification_area(bundle.Identification_Area),
         context_area=extract_context_area(bundle.Context_Area),
         bundle_member_entries=[extract_bundle_member_entry(x) for x in bundle.find_all("Bundle_Member_Entry")]
     )
 
 
-def extract_product_observational(product_observational: bs4.Tag) -> ProductLabel:
+def extract_product_observational(product_observational: bs4.Tag, checksum: str) -> ProductLabel:
     """
     Extracts keywords from the Product_Observational element
     """
     return ProductLabel(
+        checksum=checksum,
         identification_area=extract(product_observational.Identification_Area, extract_identification_area),
         context_area=extract(product_observational.Observation_Area, extract_observation_area),
         discipline_area=extract(product_observational.Discipline_Area, extract_discipline_area),
@@ -46,11 +49,12 @@ def extract_product_observational(product_observational: bs4.Tag) -> ProductLabe
     )
 
 
-def extract_product_ancillary(product_ancillary: bs4.Tag) -> ProductLabel:
+def extract_product_ancillary(product_ancillary: bs4.Tag, checksum: str) -> ProductLabel:
     """
     Extracts keywords from the Product_Observational element
     """
     return ProductLabel(
+        checksum=checksum,
         identification_area=extract(product_ancillary.Identification_Area, extract_identification_area),
         context_area=extract(product_ancillary.Context_Area, extract_context_area),
         discipline_area=extract(product_ancillary.Discipline_Area, extract_discipline_area),
@@ -58,11 +62,12 @@ def extract_product_ancillary(product_ancillary: bs4.Tag) -> ProductLabel:
     )
 
 
-def extract_product_document(product_document: bs4.Tag) -> ProductLabel:
+def extract_product_document(product_document: bs4.Tag, checksum: str) -> ProductLabel:
     """
     Extracts keywords from the Product_Document element
     """
     return ProductLabel(
+        checksum=checksum,
         identification_area=extract(product_document.Identification_Area, extract_identification_area),
         document=extract(product_document.Document, extract_document)
     )
