@@ -33,9 +33,9 @@ def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: lab
         matching_lidvids = [x for x in previous_lidvids if x.lid == next_lidvid.lid]
         if len(matching_lidvids):
             matching_lidvid = matching_lidvids[0]
-            allowed = (matching_lidvid.inc_minor(), matching_lidvid.inc_minor())
+            allowed = (matching_lidvid, matching_lidvid.inc_minor(), matching_lidvid.inc_major())
             if next_lidvid not in allowed:
-                raise Exception(f"Invalid lidvid: {next_lidvid}. Must be one of {allowed}")
+                raise Exception(f"Invalid lidvid: {next_lidvid}. Must be one of {[x.__str__() for x in allowed]}")
         else:
             raise Exception(f"{next_lidvid} does not have a corresponding LidVid in the previous collection")
 
