@@ -66,10 +66,19 @@ def fetchbundle(label_url) -> pds4.Bundle:
     bundle_label = fetchlabel(label_url)
     return pds4.Bundle(bundle_label, label_url)
 
+
 def fetchproduct(label_url) -> pds4.ProductInfo:
     product_label = fetchlabel(label_url)
-    data_urls = [os.path.join(os.path.dirname(label_url), product_label.file_area.file_name)]
-    return pds4.ProductInfo(product_label, label_url, data_urls)
+    print(product_label)
+    basepath = os.path.dirname(label_url)
+    data_urls = rebase_filenames(basepath, [product_label.file_area.file_name]) if product_label.file_area else []
+    document_urls = rebase_filenames(basepath, product_label.document.filenames()) if product_label.document else []
+    return pds4.ProductInfo(product_label, label_url, data_urls + document_urls)
+
+
+def rebase_filenames(basepath, filenames):
+    return [os.path.join(basepath, filename) for filename in filenames]
+
 
 def make_absolute(base: str, candidate: str) -> str:
     if candidate.startswith(base):
