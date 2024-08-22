@@ -4,6 +4,8 @@ import sys
 
 import validator
 import webclient
+from pds4 import LidVid
+
 
 def main():
     bundles1, collections1, products1 = load_remote_bundle("http://localhost:8000/orex.tagcams_v1.0/")
@@ -18,6 +20,15 @@ def main():
         print(b.label.checksum)
 
     validator.check_bundle_increment(bundles1[0].label, bundles2[0].label)
+
+    for collection2 in collections2:
+        lid = LidVid.parse(collection2.label.identification_area.lidvid).lid
+        matches = [x for x in collections1 if LidVid.parse(x.label.identification_area.lidvid).lid == lid]
+        if matches:
+            match = matches[0]
+            validator.check_for_modification_history(match.label)
+            validator.check_for_modification_history(collection2.label)
+            validator.check_for_preserved_modification_history(match.label, collection2.label)
 
 
 

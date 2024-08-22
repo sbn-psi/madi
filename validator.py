@@ -71,7 +71,10 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
     next_lidvid = next_collection.identification_area.lidvid
     prev_lidvid = previous_collection.identification_area.lidvid
 
-    if len(next_details) == len(previous_details) + 1:
+    next_vid = pds4.LidVid.parse(next_lidvid).vid
+    prev_vid = pds4.LidVid.parse(prev_lidvid).vid
+
+    if len(next_details) >= len(previous_details):
         pairs = zip(previous_details, next_details[:len(previous_details)])
         for pair in pairs:
             previous_detail: pds4types.ModificationDetail
@@ -82,7 +85,15 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
                 raise Exception(f'{next_lidvid} has a mismatched modification detail from {prev_lidvid}. '
                                 f'The old modification detail was {previous_detail}, and the new one was {next_detail}')
     else:
-        raise Exception(f"{next_lidvid} must contain one more modification detail than {prev_lidvid}")
+        raise Exception(f"{next_lidvid} must contain at least as many modification details as {prev_lidvid}")
+
+    if next_vid > prev_vid:
+        if not len(next_details) == len(previous_details) + 1:
+            raise Exception(f"{next_lidvid} must contain one more modification detail than {prev_lidvid}")
+
+    if next_vid == prev_vid:
+        if not len(next_details) == len(previous_details):
+            raise Exception(f"{next_lidvid} must contain exactly as many modification details as {prev_lidvid}")
 
 
 def check_bundle_for_latest_collections(bundle: pds4types.ProductLabel, collection_lidvids: Set[pds4.LidVid]):
