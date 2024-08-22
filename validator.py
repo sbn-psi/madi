@@ -22,7 +22,7 @@ def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: lab
 
     previous_bundle_lidvid = pds4.LidVid.parse(previous_bundle.identification_area.lidvid)
     next_bundle_lidvid = pds4.LidVid.parse(next_bundle.identification_area.lidvid)
-    _check_lidvid_increment(previous_bundle_lidvid, next_bundle_lidvid)
+    _check_lidvid_increment(previous_bundle_lidvid, next_bundle_lidvid, same=False)
 
     for x in previous_bundle.bundle_member_entries + next_bundle.bundle_member_entries:
         if not x.livdid_reference:
