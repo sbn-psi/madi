@@ -21,6 +21,9 @@ def main():
 
     validator.check_bundle_increment(bundles1[0].label, bundles2[0].label)
 
+    collections2lidvids = [LidVid.parse(x.label.identification_area.lidvid) for x in collections2]
+    validator.check_bundle_for_latest_collections(bundles2[0].label, set(collections2lidvids))
+
     for collection2 in collections2:
         lid = LidVid.parse(collection2.label.identification_area.lidvid).lid
         matches = [x for x in collections1 if LidVid.parse(x.label.identification_area.lidvid).lid == lid]
@@ -29,7 +32,6 @@ def main():
             validator.check_for_modification_history(match.label)
             validator.check_for_modification_history(collection2.label)
             validator.check_for_preserved_modification_history(match.label, collection2.label)
-
 
 
 def load_remote_bundle(url):

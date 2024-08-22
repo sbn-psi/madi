@@ -97,8 +97,10 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
 
 
 def check_bundle_for_latest_collections(bundle: pds4types.ProductLabel, collection_lidvids: Set[pds4.LidVid]):
-    bundle_member_lidvids = set(e.livdid_reference for e in bundle.bundle_member_entries)
+    bundle_member_lidvids = set(pds4.LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
     bundle_lidvid = bundle.identification_area.lidvid
     if not collection_lidvids == bundle_member_lidvids:
         raise Exception(f"{bundle_lidvid} does not contain the expected collection list: "
-                        f"{','.join(x.__str__() for x in collection_lidvids)}")
+                        f"{','.join(x.__str__() for x in collection_lidvids)}"
+                        f"Instead, it had: "
+                        f"{','.join(x.__str__() for x in bundle_member_lidvids)}")
