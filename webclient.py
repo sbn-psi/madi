@@ -73,7 +73,6 @@ def fetchbundle(label_url) -> pds4.Bundle:
 
 def fetchproduct(label_url) -> pds4.ProductInfo:
     product_label = fetchlabel(label_url)
-    print(product_label)
     basepath = os.path.dirname(label_url)
     data_urls = rebase_filenames(basepath, [product_label.file_area.file_name]) if product_label.file_area else []
     document_urls = rebase_filenames(basepath, product_label.document.filenames()) if product_label.document else []
