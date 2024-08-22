@@ -32,6 +32,8 @@ def main():
             validator.check_for_modification_history(match.label)
             validator.check_for_modification_history(collection2.label)
             validator.check_for_preserved_modification_history(match.label, collection2.label)
+            validator.check_collection_increment(match.inventory, collection2.inventory)
+            validator.check_collection_duplicates(match.inventory, collection2.inventory)
 
 
 def load_remote_bundle(url):
