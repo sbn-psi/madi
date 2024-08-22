@@ -4,12 +4,17 @@ import sys
 import webclient
 
 def main():
-    url = "http://localhost:8000/orex.tagcams_v1.0/"
-    bundles, collections, products = load_remote_bundle(url)
+    bundles1, collections1, products1 = load_remote_bundle("http://localhost:8000/orex.tagcams_v1.0/")
 
-    for b in bundles:
+    for b in bundles1:
         print(webclient.remote_checksum(b.url))
         print(b.label.checksum)
+
+    bundles2, collections2, products2 = load_remote_bundle("http://localhost:8000/orex.tagcams_v2.0/")
+    for b in bundles2:
+        print(webclient.remote_checksum(b.url))
+        print(b.label.checksum)
+
 
 
 def load_remote_bundle(url):
