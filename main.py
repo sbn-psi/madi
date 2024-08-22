@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os.path
 import sys
+
+import validator
 import webclient
 
 def main():
@@ -14,6 +16,8 @@ def main():
     for b in bundles2:
         print(webclient.remote_checksum(b.url))
         print(b.label.checksum)
+
+    validator.check_bundle_increment(bundles1[0].label, bundles2[0].label)
 
 
 
