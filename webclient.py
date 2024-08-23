@@ -11,6 +11,7 @@ import pds4
 from label import ProductLabel
 import product
 from pds4 import CollectionInventory
+from urls import is_ignored, is_below, make_absolute, rebase_filenames
 
 
 class ArchiveDir:
@@ -118,28 +119,3 @@ def remote_checksum(url: str) -> str:
             m.update(c)
         return m.hexdigest()
     raise Exception("Could not reach url: " + url)
-
-
-def rebase_filenames(basepath, filenames):
-    return [os.path.join(basepath, filename) for filename in filenames]
-
-
-def make_absolute(base: str, candidate: str) -> str:
-    if is_absolute(candidate):
-        if candidate.startswith(base):
-            return candidate
-        else:
-            raise Exception(f"{candidate} cannot be made absolute. It is already absolute, and not below {base}")
-    return base + candidate
-
-
-def is_absolute(candidate: str):
-    return "://" in candidate
-
-
-def is_below(base: str, candidate: str) -> bool:
-    return candidate.startswith(base) or (not "://" in candidate and not candidate.startswith("/") and not candidate.startswith(".."))
-
-
-def is_ignored(candidate: str):
-    return any([".DS_Store" in candidate, candidate.startswith("?")])
