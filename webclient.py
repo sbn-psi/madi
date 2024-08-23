@@ -79,6 +79,26 @@ def fetchproduct(label_url) -> pds4.ProductInfo:
     return pds4.ProductInfo(product_label, label_url, data_urls + document_urls)
 
 
+def fetch_file(url: str, dest_path: str, filename: str) -> str:
+    destfilename = os.path.join(dest_path, filename, 'wb')
+    r = requests.get(url)
+    if r.status_code == 200:
+        with open(destfilename) as destfile:
+            for chunk in r.iter_content():
+                destfile.write(chunk)
+
+    raise Exception("Could not reach url: " + url)
+
+
+def save_pds4_file(url: str, baseurl: str, basepath: str, superseded_version=None):
+    dir_url = os.path.dirname(url)
+    filename = os.path.basename(url)
+    dir_path = dir_url.replace(baseurl, basepath)
+    dest_path = os.path.join(dir_path, 'SUPERSEDED', f'V_{superseded_version.replace(".", "_")}') \
+        if superseded_version else dir_path
+    fetch_file(url, dest_path, filename)
+
+
 @cache
 def remote_checksum(url: str) -> str:
     r = requests.get(url)
