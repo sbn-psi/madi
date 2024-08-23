@@ -103,7 +103,10 @@ def build_destfilename(url, baseurl, basepath, superseded_version=None):
 
 def save_pds4_file(url: str, baseurl: str, basepath: str, superseded_version=None):
     destfilename = build_destfilename(url, baseurl, basepath, superseded_version)
-    fetch_file(url, destfilename)
+    return {
+        'destfilename': destfilename,
+        'checksum': fetch_file(url, destfilename)
+    }
 
 
 @cache
