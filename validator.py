@@ -28,8 +28,12 @@ def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: lab
         if not x.livdid_reference:
             raise Exception(x.lid_reference + " is referenced by lid instead of lidvid")
 
-    previous_lidvids = [pds4.LidVid.parse(x.livdid_reference) for x in previous_bundle.bundle_member_entries if x.livdid_reference]
-    next_lidvids = [pds4.LidVid.parse(x.livdid_reference) for x in next_bundle.bundle_member_entries if x.livdid_reference]
+    previous_lidvids = [pds4.LidVid.parse(x.livdid_reference)
+                        for x in previous_bundle.bundle_member_entries
+                        if x.livdid_reference]
+    next_lidvids = [pds4.LidVid.parse(x.livdid_reference)
+                    for x in next_bundle.bundle_member_entries
+                    if x.livdid_reference]
 
     for next_lidvid in next_lidvids:
         matching_lidvids = [x for x in previous_lidvids if x.lid == next_lidvid.lid]
