@@ -83,10 +83,12 @@ def fetch_file(url: str, dest_path: str, filename: str) -> str:
     destfilename = os.path.join(dest_path, filename, 'wb')
     r = requests.get(url)
     if r.status_code == 200:
+        c = hashlib.md5()
         with open(destfilename) as destfile:
             for chunk in r.iter_content():
+                c.update(chunk)
                 destfile.write(chunk)
-
+        return c.hexdigest()
     raise Exception("Could not reach url: " + url)
 
 
