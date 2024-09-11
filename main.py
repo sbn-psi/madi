@@ -8,32 +8,32 @@ from pds4 import LidVid
 
 
 def main():
-    bundles1, collections1, products1 = load_remote_bundle("http://localhost:8000/orex.tagcams_v1.0/")
+    previous_bundles, previous_collections, previous_products = load_remote_bundle("http://localhost:8000/orex.tagcams_v1.0/")
 
-    for b in bundles1:
-        print(webclient.remote_checksum(b.url))
-        print(b.label.checksum)
+    for bundle in previous_bundles:
+        print(webclient.remote_checksum(bundle.url))
+        print(bundle.label.checksum)
 
-    bundles2, collections2, products2 = load_remote_bundle("http://localhost:8000/orex.tagcams_v2.0/")
-    for b in bundles2:
-        print(webclient.remote_checksum(b.url))
-        print(b.label.checksum)
+    new_bundles, new_collections, new_products = load_remote_bundle("http://localhost:8000/orex.tagcams_v2.0/")
+    for bundle in new_bundles:
+        print(webclient.remote_checksum(bundle.url))
+        print(bundle.label.checksum)
 
-    validator.check_bundle_increment(bundles1[0].label, bundles2[0].label)
+    validator.check_bundle_increment(previous_bundles[0].label, new_bundles[0].label)
 
-    collections2lidvids = [LidVid.parse(x.label.identification_area.lidvid) for x in collections2]
-    validator.check_bundle_for_latest_collections(bundles2[0].label, set(collections2lidvids))
+    new_collection_lidvids = [LidVid.parse(x.label.identification_area.lidvid) for x in new_collections]
+    validator.check_bundle_for_latest_collections(new_bundles[0].label, set(new_collection_lidvids))
 
-    for collection2 in collections2:
-        lid = LidVid.parse(collection2.label.identification_area.lidvid).lid
-        matches = [x for x in collections1 if LidVid.parse(x.label.identification_area.lidvid).lid == lid]
-        if matches:
-            match = matches[0]
-            validator.check_for_modification_history(match.label)
-            validator.check_for_modification_history(collection2.label)
-            validator.check_for_preserved_modification_history(match.label, collection2.label)
-            validator.check_collection_increment(match.inventory, collection2.inventory)
-            validator.check_collection_duplicates(match.inventory, collection2.inventory)
+    for new_collection in new_collections:
+        new_collection_lid = LidVid.parse(new_collection.label.identification_area.lidvid).lid
+        previous_collections = [x for x in previous_collections if LidVid.parse(x.label.identification_area.lidvid).lid == new_collection_lid]
+        if previous_collections:
+            previous_collection = previous_collections[0]
+            validator.check_for_modification_history(previous_collection.label)
+            validator.check_for_modification_history(new_collection.label)
+            validator.check_for_preserved_modification_history(previous_collection.label, new_collection.label)
+            validator.check_collection_increment(previous_collection.inventory, new_collection.inventory)
+            validator.check_collection_duplicates(previous_collection.inventory, new_collection.inventory)
 
 
 def load_remote_bundle(url):
@@ -48,6 +48,7 @@ def load_remote_bundle(url):
     products = [webclient.fetchproduct(url) for url in product_urls]
 
     return bundles, collections, products
+
 
 def is_basic(x):
     return not (is_collection(x) or is_bundle(x))
