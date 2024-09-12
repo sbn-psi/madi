@@ -8,13 +8,15 @@ from pds4 import LidVid
 
 
 def main():
-    previous_bundles, previous_collections, previous_products = load_remote_bundle("http://localhost:8000/orex.tagcams_v1.0/")
+    previous_bundle_directory = "http://localhost:8000/orex.tagcams_v1.0/"
+    new_bundle_directory = "http://localhost:8000/orex.tagcams_v2.0/"
 
+    previous_bundles, previous_collections, previous_products = load_remote_bundle(previous_bundle_directory)
     for bundle in previous_bundles:
         print(webclient.remote_checksum(bundle.url))
         print(bundle.label.checksum)
 
-    new_bundles, new_collections, new_products = load_remote_bundle("http://localhost:8000/orex.tagcams_v2.0/")
+    new_bundles, new_collections, new_products = load_remote_bundle(new_bundle_directory)
     for bundle in new_bundles:
         print(webclient.remote_checksum(bundle.url))
         print(bundle.label.checksum)
