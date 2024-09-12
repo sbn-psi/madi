@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import os.path
 import sys
 
 import validator
 import webclient
+import localclient
 from pds4 import LidVid
 
 
@@ -52,6 +52,7 @@ def check_collection_against_previous(previous_collection, new_collection):
 def load_remote_bundle(url):
     root = webclient.fetchdir(url)
     label_urls = [x for x in root.flat_files() if x.endswith(".xml")]
+
     product_urls = [x for x in label_urls if is_basic(x)]
     bundle_urls = [x for x in label_urls if is_bundle(x)]
     collection_urls = [x for x in label_urls if is_collection(x)]
@@ -59,6 +60,21 @@ def load_remote_bundle(url):
     collections = [webclient.fetchcollection(url) for url in collection_urls]
     bundles = [webclient.fetchbundle(url) for url in bundle_urls]
     products = [webclient.fetchproduct(url) for url in product_urls]
+
+    return bundles, collections, products
+
+
+def load_local_bundle(path):
+    filepaths = localclient.get_file_paths(path)
+    label_paths = [x for x in filepaths if x.endswith(".xml")]
+
+    product_paths = [x for x in label_paths if is_basic(x)]
+    bundle_paths = [x for x in label_paths if is_bundle(x)]
+    collection_paths = [x for x in label_paths if is_collection(x)]
+
+    collections = [localclient.fetchcollection(path) for path in collection_paths]
+    bundles = [localclient.fetchbundle(path) for path in bundle_paths]
+    products = [localclient.fetchproduct(path) for path in product_paths]
 
     return bundles, collections, products
 

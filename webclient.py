@@ -11,7 +11,8 @@ import pds4
 from label import ProductLabel
 import product
 from pds4 import CollectionInventory
-from urls import is_ignored, is_below, make_absolute, rebase_filenames
+from urls import is_ignored, is_below, make_absolute
+from paths import rebase_filenames
 
 
 class ArchiveDir:

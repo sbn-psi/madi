@@ -1,6 +1,3 @@
-import os
-
-
 def is_ignored(candidate: str):
     return any([".DS_Store" in candidate, candidate.startswith("?")])
 
@@ -22,5 +19,3 @@ def make_absolute(base: str, candidate: str) -> str:
     return base + candidate
 
 
-def rebase_filenames(basepath, filenames):
-    return [os.path.join(basepath, filename) for filename in filenames]
