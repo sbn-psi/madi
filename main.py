@@ -68,6 +68,8 @@ def load_local_bundle(path):
     bundles = [localclient.fetchbundle(path) for path in label_paths if is_bundle(path)]
     products = [localclient.fetchproduct(path) for path in label_paths if is_basic(path)]
 
+    if len(bundles) == 0:
+        raise Exception(f"Could not find bundle product in: {path}")
     return bundles, collections, products
 
 

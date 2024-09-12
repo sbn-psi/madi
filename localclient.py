@@ -12,7 +12,7 @@ import pds4
 def fetchcollection(path):
     collection_label = fetchlabel(path)
     inventory_path = os.path.join(os.path.dirname(path), collection_label.file_area.file_name)
-    with open(inventory_path) as f:
+    with open(inventory_path, newline="") as f:
         inventory = pds4.CollectionInventory.from_csv(f.read())
     return pds4.Collection(collection_label, inventory)
 
