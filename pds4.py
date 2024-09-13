@@ -78,10 +78,13 @@ class LidVid:
 
 
 class ProductInfo:
-    def __init__(self, lbl: label.ProductLabel, label_url: str = None, data_urls: List[str] = None):
+    def __init__(self, lbl: label.ProductLabel, label_url: str = None, data_urls: List[str] = None, label_path: str = None, data_paths: List[str] = None):
         self.lbl = lbl
         self.label_url = label_url
+        self.label_path = label_path
         self.data_urls = data_urls
+        self.data_paths = data_paths
+
 
 
 class Collection:
@@ -89,11 +92,15 @@ class Collection:
                  collection_label: pds4types.ProductLabel,
                  inventory: "CollectionInventory",
                  label_url: str = None,
-                 inventory_url: str = None):
+                 inventory_url: str = None,
+                 label_path: str = None,
+                 inventory_path: str = None):
         self.label = collection_label
         self.inventory = inventory
         self.label_url = label_url
         self.inventory_url = inventory_url
+        self.label_path = label_path
+        self.inventory_path = inventory_path
 
 
 class CollectionInventory:
@@ -148,6 +155,7 @@ class CollectionInventory:
 
 
 class Bundle:
-    def __init__(self, bundle_label: pds4types.ProductLabel, url: str = None):
+    def __init__(self, bundle_label: pds4types.ProductLabel, url: str = None, path: str = None):
         self.label = bundle_label
         self.url = url
+        self.path = path
