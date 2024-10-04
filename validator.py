@@ -20,8 +20,8 @@ def _check_dict_increment(previous_lidvids: Dict[pds4.Lid, pds4.LidVid], next_li
 
 def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: label.ProductLabel):
 
-    previous_bundle_lidvid = pds4.LidVid.parse(previous_bundle.identification_area.lidvid)
-    next_bundle_lidvid = pds4.LidVid.parse(next_bundle.identification_area.lidvid)
+    previous_bundle_lidvid = previous_bundle.identification_area.lidvid
+    next_bundle_lidvid = next_bundle.identification_area.lidvid
     _check_lidvid_increment(previous_bundle_lidvid, next_bundle_lidvid, same=False)
 
     for x in previous_bundle.bundle_member_entries + next_bundle.bundle_member_entries:
@@ -65,7 +65,7 @@ def check_collection_duplicates(previous_collection: pds4.CollectionInventory,
 
 
 def check_for_modification_history(lbl: label.ProductLabel):
-    lidvid = pds4.LidVid.parse(lbl.identification_area.lidvid)
+    lidvid = lbl.identification_area.lidvid
     vid = lidvid.vid.__str__()
     if lbl.identification_area.modification_history is None:
         raise Exception(f"{lidvid} does not have a modification history")
@@ -83,8 +83,8 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
     next_lidvid = next_collection.identification_area.lidvid
     prev_lidvid = previous_collection.identification_area.lidvid
 
-    next_vid = pds4.LidVid.parse(next_lidvid).vid
-    prev_vid = pds4.LidVid.parse(prev_lidvid).vid
+    next_vid = next_lidvid.vid
+    prev_vid = prev_lidvid.vid
 
     if len(next_details) >= len(previous_details):
         pairs = zip(previous_details, next_details[:len(previous_details)])
