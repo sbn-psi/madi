@@ -14,12 +14,12 @@ def fetchcollection(path):
     inventory_path = os.path.join(os.path.dirname(path), collection_label.file_area.file_name)
     with open(inventory_path, newline="") as f:
         inventory = pds4.CollectionInventory.from_csv(f.read())
-    return pds4.Collection(collection_label, inventory, label_path=path, inventory_path=inventory_path)
+    return pds4.CollectionProduct(collection_label, inventory, label_path=path, inventory_path=inventory_path)
 
 
 def fetchbundle(path):
     bundle_label = fetchlabel(path)
-    return pds4.Bundle(bundle_label, path=path)
+    return pds4.BundleProduct(bundle_label, path=path)
 
 
 def fetchproduct(path):
@@ -27,7 +27,7 @@ def fetchproduct(path):
     data_paths = paths.rebase_filenames(path, [product_label.file_area.file_name]) if product_label.file_area else []
     document_paths = paths.rebase_filenames(path, product_label.document.filenames()) if product_label.document else []
 
-    return pds4.ProductInfo(product_label, label_path=path, data_paths=data_paths + document_paths)
+    return pds4.BasicProduct(product_label, label_path=path, data_paths=data_paths + document_paths)
 
 
 def fetchlabel(path):

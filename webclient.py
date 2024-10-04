@@ -61,24 +61,24 @@ def fetchinventory(url) -> CollectionInventory:
     raise Exception("Could not reach url: " + url)
 
 
-def fetchcollection(label_url) -> pds4.Collection:
+def fetchcollection(label_url) -> pds4.CollectionProduct:
     collection_label = fetchlabel(label_url)
     inventory_url = os.path.join(os.path.dirname(label_url), collection_label.file_area.file_name)
     inventory = fetchinventory(inventory_url)
-    return pds4.Collection(collection_label, inventory, label_url, inventory_url)
+    return pds4.CollectionProduct(collection_label, inventory, label_url, inventory_url)
 
 
-def fetchbundle(label_url) -> pds4.Bundle:
+def fetchbundle(label_url) -> pds4.BundleProduct:
     bundle_label = fetchlabel(label_url)
-    return pds4.Bundle(bundle_label, label_url)
+    return pds4.BundleProduct(bundle_label, label_url)
 
 
-def fetchproduct(label_url) -> pds4.ProductInfo:
+def fetchproduct(label_url) -> pds4.BasicProduct:
     product_label = fetchlabel(label_url)
     basepath = os.path.dirname(label_url)
     data_urls = rebase_filenames(basepath, [product_label.file_area.file_name]) if product_label.file_area else []
     document_urls = rebase_filenames(basepath, product_label.document.filenames()) if product_label.document else []
-    return pds4.ProductInfo(product_label, label_url, data_urls + document_urls)
+    return pds4.BasicProduct(product_label, label_url, data_urls + document_urls)
 
 
 def fetch_file(url: str, destfilename) -> str:

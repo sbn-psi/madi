@@ -77,7 +77,7 @@ class LidVid:
         return LidVid(self.lid, self.vid.inc_minor())
 
 
-class ProductInfo:
+class BasicProduct:
     def __init__(self, lbl: label.ProductLabel, label_url: str = None, data_urls: List[str] = None, label_path: str = None, data_paths: List[str] = None):
         self.lbl = lbl
         self.label_url = label_url
@@ -86,7 +86,7 @@ class ProductInfo:
         self.data_paths = data_paths
 
 
-class Collection:
+class CollectionProduct:
     def __init__(self,
                  collection_label: pds4types.ProductLabel,
                  inventory: "CollectionInventory",
@@ -153,7 +153,7 @@ class CollectionInventory:
             self.add_secondary(lidvid)
 
 
-class Bundle:
+class BundleProduct:
     def __init__(self, bundle_label: pds4types.ProductLabel, url: str = None, path: str = None):
         self.label = bundle_label
         self.url = url
