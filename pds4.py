@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Iterable, Dict, Tuple, List
+from typing import List
 import itertools
 import csv
 
@@ -59,6 +59,7 @@ class Vid:
 class LidVid:
     lid: Lid
     vid: Vid
+
     @staticmethod
     def parse(lidvid):
         tokens = lidvid.split("::")
@@ -126,7 +127,7 @@ class CollectionInventory:
             raise Exception("Product already exists as a primary member and can't be made secondary")
         if lid in self.secondary:
             previous = self.secondary[lid]
-            if lidvid.vid >= lidvid.vid:
+            if previous.vid >= lidvid.vid:
                 raise Exception("Product is not newer than the version that already exists in the inventory")
         self.secondary[lid] = lidvid
 
