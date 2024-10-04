@@ -61,12 +61,17 @@ class LidVid:
     vid: Vid
 
     @staticmethod
-    def parse(lidvid):
-        tokens = lidvid.split("::")
+    def parse(lidvid: str):
+        lid, vid = lidvid.split("::")
+        return LidVid.assemble(lid, vid)
+
+    @staticmethod
+    def assemble(lid: str, vid: str):
         return LidVid(
-            lid=Lid.parse(tokens[0]),
-            vid=Vid.parse(tokens[1])
+            lid=Lid.parse(lid),
+            vid=Vid.parse(vid)
         )
+
 
     def __str__(self):
         return f'{self.lid}::{self.vid}'

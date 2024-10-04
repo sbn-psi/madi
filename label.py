@@ -6,6 +6,7 @@ from typing import TypeVar, Callable
 
 import bs4
 
+import pds4
 from labeltypes import DocumentFile, DocumentEdition, Document, SoftwareProgram, Software, Process, \
     ProcessingInformation, DisciplineArea, FileArea, TimeCoordinates, ContextArea, ModificationDetail, \
     ModificationHistory, IdentificationArea, ProductLabel, ObservingSystem, ObservingSystemComponent, \
@@ -81,15 +82,9 @@ def _extract_identification_area(identification_area: bs4.Tag) -> Identification
     vid = _elemstr(identification_area.version_id)
     modification_history = _extract(identification_area.Modification_History, _extract_modification_history)
 
-    major, minor = [int(x) for x in vid.split(".")]
-
     return IdentificationArea(
-        logical_id=lid,
+        lidvid=pds4.LidVid.assemble(lid, vid),
         collection_id=_extract_collection_id(lid),
-        version_id=vid,
-        lidvid=f"{lid}::{vid}",
-        major=major,
-        minor=minor,
         modification_history=modification_history
     )
 

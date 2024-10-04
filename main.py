@@ -23,7 +23,7 @@ def main():
 
     for new_collection in new_collections:
         new_collection_lid = LidVid.parse(new_collection.label.identification_area.lidvid).lid
-        previous_collections = [x for x in previous_collections if LidVid.parse(x.label.identification_area.lidvid).lid == new_collection_lid]
+        previous_collections = [x for x in previous_collections if x.label.identification_area.lidvid.lid == new_collection_lid]
         if previous_collections:
             previous_collection = previous_collections[0]
             check_collection_against_previous(previous_collection, new_collection)
@@ -34,7 +34,7 @@ def check_bundle_against_previous(previous_bundle, new_bundle):
 
 
 def check_bundle_against_collections(bundle, collections):
-    collection_lidvids = [LidVid.parse(x.label.identification_area.lidvid) for x in collections]
+    collection_lidvids = [x.label.identification_area.lidvid for x in collections]
     validator.check_bundle_for_latest_collections(bundle.label, set(collection_lidvids))
 
 
