@@ -115,6 +115,7 @@ class IdentificationArea:
     minor: int
     modification_history: ModificationHistory
 
+
 @dataclass()
 class BundleMemberEntry:
     member_status: str
@@ -132,12 +133,6 @@ class ProductLabel:
     discipline_area: Optional[DisciplineArea] = None
     document: Optional[Document] = None
     bundle_member_entries: List[BundleMemberEntry] = None
-
-
-@dataclass()
-class CollectionLabel:
-    identification_area: IdentificationArea
-    context_area: ContextArea
 
 
 
