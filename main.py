@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import sys
 
+import pds4
 import validator
 import localclient
+from typing import Iterable
 from pds4 import LidVid
 
 
@@ -29,16 +31,16 @@ def main():
             check_collection_against_previous(previous_collection, new_collection)
 
 
-def check_bundle_against_previous(previous_bundle, new_bundle):
+def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, new_bundle: pds4.BundleProduct):
     validator.check_bundle_increment(previous_bundle.label, new_bundle.label)
 
 
-def check_bundle_against_collections(bundle, collections):
+def check_bundle_against_collections(bundle: pds4.BundleProduct, collections: Iterable[pds4.CollectionProduct]):
     collection_lidvids = [x.label.identification_area.lidvid for x in collections]
     validator.check_bundle_for_latest_collections(bundle.label, set(collection_lidvids))
 
 
-def check_collection_against_previous(previous_collection, new_collection):
+def check_collection_against_previous(previous_collection: pds4.CollectionProduct, new_collection: pds4.CollectionProduct):
     validator.check_for_modification_history(previous_collection.label)
     validator.check_for_modification_history(new_collection.label)
     validator.check_for_preserved_modification_history(previous_collection.label, new_collection.label)
@@ -46,7 +48,7 @@ def check_collection_against_previous(previous_collection, new_collection):
     validator.check_collection_duplicates(previous_collection.inventory, new_collection.inventory)
 
 
-def load_local_bundle(path):
+def load_local_bundle(path: str):
     filepaths = localclient.get_file_paths(path)
     label_paths = [x for x in filepaths if x.endswith(".xml")]
 
@@ -59,15 +61,15 @@ def load_local_bundle(path):
     return bundles, collections, products
 
 
-def is_basic(x):
+def is_basic(x: str):
     return not (is_collection(x) or is_bundle(x))
 
 
-def is_collection(x):
+def is_collection(x: str):
     return "collection" in x
 
 
-def is_bundle(x):
+def is_bundle(x: str):
     return "bundle" in x
 
 
