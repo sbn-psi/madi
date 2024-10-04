@@ -86,7 +86,6 @@ class ProductInfo:
         self.data_paths = data_paths
 
 
-
 class Collection:
     def __init__(self,
                  collection_label: pds4types.ProductLabel,
