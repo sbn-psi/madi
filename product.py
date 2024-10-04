@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 import label
 import logging
 
-from pds4types import ProductLabel, ObservingSystemComponent
+from labeltypes import ProductLabel, ObservingSystemComponent
 
 
 def extract_label(xmldoc: BeautifulSoup, checksum: str, filepath: str = '') -> ProductLabel:

@@ -1,6 +1,6 @@
 import pds4
 import label
-import pds4types
+import labeltypes
 from typing import Dict, Set
 
 

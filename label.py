@@ -6,7 +6,7 @@ from typing import TypeVar, Callable
 
 import bs4
 
-from pds4types import DocumentFile, DocumentEdition, Document, SoftwareProgram, Software, Process, \
+from labeltypes import DocumentFile, DocumentEdition, Document, SoftwareProgram, Software, Process, \
     ProcessingInformation, DisciplineArea, FileArea, TimeCoordinates, ContextArea, ModificationDetail, \
     ModificationHistory, IdentificationArea, ProductLabel, ObservingSystem, ObservingSystemComponent, \
     InternalReference, BundleMemberEntry

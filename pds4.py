@@ -4,7 +4,7 @@ import itertools
 import csv
 
 import label
-import pds4types
+import labeltypes
 
 
 @dataclass(frozen=True)
