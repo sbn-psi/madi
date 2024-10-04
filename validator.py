@@ -89,8 +89,8 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
     if len(next_details) >= len(previous_details):
         pairs = zip(previous_details, next_details[:len(previous_details)])
         for pair in pairs:
-            previous_detail: pds4types.ModificationDetail
-            next_detail: pds4types.ModificationDetail
+            previous_detail: labeltypes.ModificationDetail
+            next_detail: labeltypes.ModificationDetail
             previous_detail, next_detail = pair
 
             if not previous_detail == next_detail:
@@ -108,7 +108,7 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
             raise Exception(f"{next_lidvid} must contain exactly as many modification details as {prev_lidvid}")
 
 
-def check_bundle_for_latest_collections(bundle: pds4types.ProductLabel, collection_lidvids: Set[pds4.LidVid]):
+def check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collection_lidvids: Set[pds4.LidVid]):
     bundle_member_lidvids = set(pds4.LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
     bundle_lidvid = bundle.identification_area.lidvid
     if not collection_lidvids == bundle_member_lidvids:
