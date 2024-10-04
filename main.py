@@ -2,23 +2,20 @@
 import sys
 
 import validator
-import webclient
 import localclient
 from pds4 import LidVid
 
 
 def main():
-    previous_bundle_directory = "http://localhost:8000/orex.tagcams_v1.0/"
-    new_bundle_directory = "http://localhost:8000/orex.tagcams_v2.0/"
+    previous_bundle_directory = sys.argv[1]
+    new_bundle_directory = sys.argv[2]
 
-    previous_bundles, previous_collections, previous_products = load_remote_bundle(previous_bundle_directory)
+    previous_bundles, previous_collections, previous_products = load_local_bundle(previous_bundle_directory)
     for bundle in previous_bundles:
-        print(webclient.remote_checksum(bundle.url))
         print(bundle.label.checksum)
 
-    new_bundles, new_collections, new_products = load_remote_bundle(new_bundle_directory)
+    new_bundles, new_collections, new_products = load_local_bundle(new_bundle_directory)
     for bundle in new_bundles:
-        print(webclient.remote_checksum(bundle.url))
         print(bundle.label.checksum)
 
     check_bundle_against_previous(previous_bundles[0], new_bundles[0])
@@ -47,17 +44,6 @@ def check_collection_against_previous(previous_collection, new_collection):
     validator.check_for_preserved_modification_history(previous_collection.label, new_collection.label)
     validator.check_collection_increment(previous_collection.inventory, new_collection.inventory)
     validator.check_collection_duplicates(previous_collection.inventory, new_collection.inventory)
-
-
-def load_remote_bundle(url):
-    root = webclient.fetchdir(url)
-    label_urls = [x for x in root.flat_files() if x.endswith(".xml")]
-
-    collections = [webclient.fetchcollection(url) for url in label_urls if is_collection(url)]
-    bundles = [webclient.fetchbundle(url) for url in label_urls if is_bundle(url)]
-    products = [webclient.fetchproduct(url) for url in label_urls if is_basic(url)]
-
-    return bundles, collections, products
 
 
 def load_local_bundle(path):
