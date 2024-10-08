@@ -19,6 +19,13 @@ def main():
 
     check_ready(args.previous_bundle_directory, args.new_bundle_directory)
 
+    if args.supersede():
+        supersede(args.previous_bundle_directory, args.new_bundle_directory, args.supersede)
+
+
+def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_directory):
+    print(f"TODO: Supersede {previous_bundle_directory} with new data from {new_bundle_directory} into {merged_bundle_directory}")
+
 
 def check_ready(previous_bundle_directory, new_bundle_directory):
     previous_bundles, previous_collections, previous_products = load_local_bundle(previous_bundle_directory)
