@@ -16,8 +16,11 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FullBundle:
     bundles: List[BundleProduct]
+    superseded_bundles: List[BundleProduct]
     collections: List[CollectionProduct]
+    superseded_collections: List[CollectionProduct]
     products: List[BasicProduct]
+    superseded_products: List[BasicProduct]
 
 
 def main():
@@ -122,13 +125,17 @@ def load_local_bundle(path: str) -> FullBundle:
     filepaths = localclient.get_file_paths(path)
     label_paths = [x for x in filepaths if x.endswith(".xml")]
 
-    collections = [localclient.fetchcollection(path) for path in label_paths if is_collection(path)]
-    bundles = [localclient.fetchbundle(path) for path in label_paths if is_bundle(path)]
-    products = [localclient.fetchproduct(path) for path in label_paths if is_basic(path)]
+    collections = [localclient.fetchcollection(path) for path in label_paths if is_collection(path) and not is_superseded(path)]
+    bundles = [localclient.fetchbundle(path) for path in label_paths if is_bundle(path) and not is_superseded(path)]
+    products = [localclient.fetchproduct(path) for path in label_paths if is_basic(path) and not is_superseded(path)]
+
+    superseded_collections = [localclient.fetchcollection(path) for path in label_paths if is_collection(path) and is_superseded(path)]
+    superseded_bundles = [localclient.fetchbundle(path) for path in label_paths if is_bundle(path) and is_superseded(path)]
+    superseded_products = [localclient.fetchproduct(path) for path in label_paths if is_basic(path) and is_superseded(path)]
 
     if len(bundles) == 0:
         raise Exception(f"Could not find bundle product in: {path}")
-    return FullBundle(bundles, collections, products)
+    return FullBundle(bundles, superseded_bundles, collections, superseded_collections, products, superseded_products)
 
 
 def is_basic(x: str):
@@ -142,6 +149,8 @@ def is_collection(x: str):
 def is_bundle(x: str):
     return "bundle" in x
 
+def is_superseded(x: str):
+    return "SUPERSEDED" in x
 
 if __name__ == "__main__":
     sys.exit(main())
