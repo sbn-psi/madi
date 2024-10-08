@@ -65,13 +65,13 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
     logger.info(f"Collections to keep: {[str(x.label.identification_area.lidvid) for x in previous_collections_to_keep]}")
     logger.info(f"New collections: {[str(x.label.identification_area.lidvid) for x in new_fullbundle.collections]}")
 
-    new_bundle_product_lids = set(x.lbl.identification_area.lidvid.lid for x in new_fullbundle.products)
-    previous_products_to_keep = [x for x in previous_fullbundle.products if x.lbl.identification_area.lidvid.lid not in new_bundle_product_lids]
-    previous_products_to_supersede = [x for x in previous_fullbundle.products if x.lbl.identification_area.lidvid.lid in new_bundle_product_lids]
+    new_bundle_product_lids = set(x.label.identification_area.lidvid.lid for x in new_fullbundle.products)
+    previous_products_to_keep = [x for x in previous_fullbundle.products if x.label.identification_area.lidvid.lid not in new_bundle_product_lids]
+    previous_products_to_supersede = [x for x in previous_fullbundle.products if x.label.identification_area.lidvid.lid in new_bundle_product_lids]
 
-    logger.info(f"Products to supersede: {[str(x.lbl.identification_area.lidvid) for x in previous_products_to_supersede]}")
-    logger.info(f"Products to keep: {[str(x.lbl.identification_area.lidvid) for x in previous_products_to_keep]}")
-    logger.info(f"New bundles: {[str(x.lbl.identification_area.lidvid) for x in new_fullbundle.products]}")
+    logger.info(f"Products to supersede: {[str(x.label.identification_area.lidvid) for x in previous_products_to_supersede]}")
+    logger.info(f"Products to keep: {[str(x.label.identification_area.lidvid) for x in previous_products_to_keep]}")
+    logger.info(f"New bundles: {[str(x.label.identification_area.lidvid) for x in new_fullbundle.products]}")
 
 
 def check_ready(previous_bundle_directory, new_bundle_directory):

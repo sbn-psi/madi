@@ -10,8 +10,8 @@ from lids import LidVid
 
 
 class BasicProduct:
-    def __init__(self, lbl: labeltypes.ProductLabel, label_url: str = None, data_urls: List[str] = None, label_path: str = None, data_paths: List[str] = None):
-        self.lbl = lbl
+    def __init__(self, label: labeltypes.ProductLabel, label_url: str = None, data_urls: List[str] = None, label_path: str = None, data_paths: List[str] = None):
+        self.label = label
         self.label_url = label_url
         self.label_path = label_path
         self.data_urls = data_urls
