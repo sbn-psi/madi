@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 import sys
+from dataclasses import dataclass
 
 import pds4
 import validator
 import localclient
 
-from typing import Iterable
-from pds4 import LidVid
+from typing import Iterable, List
+from pds4 import BundleProduct, CollectionProduct, BasicProduct
 import argparse
 import logging
 
 logger = logging.getLogger(__name__)
+
+@dataclass
+class FullBundle:
+    bundles: List[BundleProduct]
+    collections: List[CollectionProduct]
+    products: List[BasicProduct]
 
 
 def main():
@@ -34,25 +41,32 @@ def main():
 
 def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_directory):
     logger.info(f"TODO: Supersede {previous_bundle_directory} with new data from {new_bundle_directory} into {merged_bundle_directory}")
+    previous_fullbundle = load_local_bundle(previous_bundle_directory)
+
+    new_fullbundle = load_local_bundle(new_bundle_directory)
 
 
 def check_ready(previous_bundle_directory, new_bundle_directory):
     logger.info(f"Checking readiness of new bundle {new_bundle_directory} against {previous_bundle_directory}")
 
-    previous_bundles, previous_collections, previous_products = load_local_bundle(previous_bundle_directory)
-    for bundle in previous_bundles:
+    previous_fullbundle = load_local_bundle(previous_bundle_directory)
+    for bundle in previous_fullbundle.bundles:
         logger.info(f'Previous bundle checksum: {bundle.label.checksum}')
 
-    new_bundles, new_collections, new_products = load_local_bundle(new_bundle_directory)
-    for bundle in new_bundles:
+    new_fullbundle = load_local_bundle(new_bundle_directory)
+    for bundle in new_fullbundle.bundles:
         logger.info(f'New bundle checksum: {bundle.label.checksum}')
 
-    check_bundle_against_previous(previous_bundles[0], new_bundles[0])
-    check_bundle_against_collections(new_bundles[0], new_collections)
+    do_checkready(new_fullbundle, previous_fullbundle)
 
-    for new_collection in new_collections:
+
+def do_checkready(new_fullbundle: FullBundle, previous_fullbundle: FullBundle):
+    check_bundle_against_previous(previous_fullbundle.bundles[0], new_fullbundle.bundles[0])
+    check_bundle_against_collections(new_fullbundle.bundles[0], new_fullbundle.collections)
+    for new_collection in new_fullbundle.collections:
         new_collection_lid = new_collection.label.identification_area.lidvid.lid
-        previous_collections = [x for x in previous_collections if x.label.identification_area.lidvid.lid == new_collection_lid]
+        previous_collections = [x for x in previous_fullbundle.collections if
+                                x.label.identification_area.lidvid.lid == new_collection_lid]
         if previous_collections:
             previous_collection = previous_collections[0]
             check_collection_against_previous(previous_collection, new_collection)
@@ -78,7 +92,7 @@ def check_collection_against_previous(previous_collection: pds4.CollectionProduc
     validator.check_collection_duplicates(previous_collection.inventory, new_collection.inventory)
 
 
-def load_local_bundle(path: str):
+def load_local_bundle(path: str) -> FullBundle:
     logger.info(f'Loading bundle: {path}')
     filepaths = localclient.get_file_paths(path)
     label_paths = [x for x in filepaths if x.endswith(".xml")]
@@ -89,7 +103,7 @@ def load_local_bundle(path: str):
 
     if len(bundles) == 0:
         raise Exception(f"Could not find bundle product in: {path}")
-    return bundles, collections, products
+    return FullBundle(bundles, collections, products)
 
 
 def is_basic(x: str):
