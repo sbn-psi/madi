@@ -4,9 +4,14 @@ import labeltypes
 from typing import Dict, Set
 
 from lids import Lid, LidVid
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def check_collection_increment(previous_collection: pds4.CollectionInventory,
                                next_collection: pds4.CollectionInventory):
+    logger.info(f'Checking version increment for collection inventory members')
     _check_dict_increment(previous_collection.primary, next_collection.primary)
     _check_dict_increment(previous_collection.secondary, next_collection.secondary)
 
@@ -20,6 +25,7 @@ def _check_dict_increment(previous_lidvids: Dict[Lid, LidVid], next_lidvids: Dic
 
 
 def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: label.ProductLabel):
+    logger.info(f'Checking version increment for {next_bundle.identification_area.lidvid} against {previous_bundle.identification_area.lidvid}')
 
     previous_bundle_lidvid = previous_bundle.identification_area.lidvid
     next_bundle_lidvid = next_bundle.identification_area.lidvid
@@ -51,6 +57,7 @@ def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: lab
 
 
 def _check_lidvid_increment(previous_lidvid: LidVid, next_lidvid: LidVid, same=True, minor=True, major=True):
+    logger.info(f'Checking increment of {next_lidvid} against {previous_lidvid}')
     allowed = ([previous_lidvid] if same else []) + \
               ([previous_lidvid.inc_minor()] if minor else []) + \
               ([previous_lidvid.inc_major()] if major else [])
@@ -60,12 +67,15 @@ def _check_lidvid_increment(previous_lidvid: LidVid, next_lidvid: LidVid, same=T
 
 def check_collection_duplicates(previous_collection: pds4.CollectionInventory,
                                 next_collection: pds4.CollectionInventory):
+    logger.info(f'Checking collection inventory for duplicate products')
+
     duplicates = next_collection.products().intersection(previous_collection.products())
     if len(duplicates):
         raise Exception(f'Collection had duplicate products: {", ".join(x.__str__() for x in duplicates)}')
 
 
 def check_for_modification_history(lbl: label.ProductLabel):
+    logger.info(f'Checking modification history for {lbl.identification_area.lidvid}')
     lidvid = lbl.identification_area.lidvid
     vid = lidvid.vid.__str__()
     if lbl.identification_area.modification_history is None:
@@ -78,6 +88,7 @@ def check_for_modification_history(lbl: label.ProductLabel):
 
 def check_for_preserved_modification_history(previous_collection: label.ProductLabel,
                                              next_collection: label.ProductLabel):
+    logger.info(f'Checking consistency of modification history for {next_collection.identification_area.lidvid} against {previous_collection.identification_area.lidvid}')
     previous_details = previous_collection.identification_area.modification_history.modification_details
     next_details = next_collection.identification_area.modification_history.modification_details
 
@@ -110,6 +121,7 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
 
 
 def check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collection_lidvids: Set[LidVid]):
+    logger.info(f'Checking collections references in {bundle.identification_area.lidvid}')
     bundle_member_lidvids = set(LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
     bundle_lidvid = bundle.identification_area.lidvid
     if not collection_lidvids == bundle_member_lidvids:
