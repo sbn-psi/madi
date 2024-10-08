@@ -4,9 +4,13 @@ import sys
 import pds4
 import validator
 import localclient
+
 from typing import Iterable
 from pds4 import LidVid
 import argparse
+import logging
+
+logger= logging.getLogger(__name__)
 
 
 def main():
@@ -15,7 +19,12 @@ def main():
     parser.add_argument("new_bundle_directory", type=str)
     parser.add_argument("-s", "--supersede", type=str)
 
+    logging.basicConfig(level=logging.INFO)
     args = parser.parse_args()
+    logger.info(f'Previous Bundle Directory: {args.previous_bundle_directoty}')
+    logger.info(f'New Bundle Directory: {args.new_bundle_directoty}')
+    if args.supersede():
+        logger.info(f'Merged Bundle Directory: {args.supersede}')
 
     check_ready(args.previous_bundle_directory, args.new_bundle_directory)
 
