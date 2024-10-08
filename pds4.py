@@ -8,17 +8,22 @@ import labeltypes
 
 from lids import LidVid
 
-
-class BasicProduct:
-    def __init__(self, label: labeltypes.ProductLabel, label_url: str = None, data_urls: List[str] = None, label_path: str = None, data_paths: List[str] = None):
-        self.label = label
+class Pds4Product:
+    def __init__(self, product_label: labeltypes.ProductLabel, label_url: str = None, label_path: str = None):
+        self.label = product_label
         self.label_url = label_url
         self.label_path = label_path
+
+
+class BasicProduct(Pds4Product):
+    def __init__(self, product_label: labeltypes.ProductLabel, label_url: str = None,
+                 data_urls: List[str] = None, label_path: str = None, data_paths: List[str] = None):
+        super().__init__(product_label, label_url, label_path)
         self.data_urls = data_urls
         self.data_paths = data_paths
 
 
-class CollectionProduct:
+class CollectionProduct(Pds4Product):
     def __init__(self,
                  collection_label: labeltypes.ProductLabel,
                  inventory: "CollectionInventory",
@@ -26,15 +31,13 @@ class CollectionProduct:
                  inventory_url: str = None,
                  label_path: str = None,
                  inventory_path: str = None):
-        self.label = collection_label
+        super().__init__(collection_label, label_url, label_path)
         self.inventory = inventory
-        self.label_url = label_url
         self.inventory_url = inventory_url
-        self.label_path = label_path
         self.inventory_path = inventory_path
 
 
-class CollectionInventory:
+class CollectionInventory(Pds4Product):
     def __init__(self, primary: set[LidVid] = None, secondary: set[LidVid] = None):
         self.primary = dict((x.lid, x) for x in primary) if primary is not None else {}
         self.secondary = dict((x.lid, x) for x in secondary) if primary is not None else {}
@@ -85,8 +88,6 @@ class CollectionInventory:
             self.add_secondary(lidvid)
 
 
-class BundleProduct:
+class BundleProduct(Pds4Product):
     def __init__(self, bundle_label: labeltypes.ProductLabel, url: str = None, path: str = None):
-        self.label = bundle_label
-        self.url = url
-        self.path = path
+        super().__init__(bundle_label, url, path)
