@@ -1,9 +1,7 @@
 import itertools
 from dataclasses import dataclass
 from typing import Optional, Iterable, List
-
-import pds4
-
+import lids
 
 @dataclass()
 class DocumentFile:
@@ -109,7 +107,7 @@ class ModificationHistory:
 
 @dataclass()
 class IdentificationArea:
-    lidvid: pds4.LidVid
+    lidvid: lids.LidVid
     collection_id: str
     modification_history: ModificationHistory
 

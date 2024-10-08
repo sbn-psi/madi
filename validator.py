@@ -3,6 +3,7 @@ import label
 import labeltypes
 from typing import Dict, Set
 
+from lids import Lid, LidVid
 
 def check_collection_increment(previous_collection: pds4.CollectionInventory,
                                next_collection: pds4.CollectionInventory):
@@ -10,11 +11,11 @@ def check_collection_increment(previous_collection: pds4.CollectionInventory,
     _check_dict_increment(previous_collection.secondary, next_collection.secondary)
 
 
-def _check_dict_increment(previous_lidvids: Dict[pds4.Lid, pds4.LidVid], next_lidvids: Dict[pds4.Lid, pds4.LidVid]):
+def _check_dict_increment(previous_lidvids: Dict[Lid, LidVid], next_lidvids: Dict[Lid, LidVid]):
     for lid in next_lidvids.keys():
         if lid in previous_lidvids.keys():
-            lidvid: pds4.LidVid = next_lidvids[lid]
-            previous_lidvid: pds4.LidVid = previous_lidvids[lid]
+            lidvid: LidVid = next_lidvids[lid]
+            previous_lidvid: LidVid = previous_lidvids[lid]
             _check_lidvid_increment(previous_lidvid, lidvid, same=False)
 
 
@@ -28,10 +29,10 @@ def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: lab
         if not x.livdid_reference:
             raise Exception(x.lid_reference + " is referenced by lid instead of lidvid")
 
-    previous_lidvids = [pds4.LidVid.parse(x.livdid_reference)
+    previous_lidvids = [LidVid.parse(x.livdid_reference)
                         for x in previous_bundle.bundle_member_entries
                         if x.livdid_reference]
-    next_lidvids = [pds4.LidVid.parse(x.livdid_reference)
+    next_lidvids = [LidVid.parse(x.livdid_reference)
                     for x in next_bundle.bundle_member_entries
                     if x.livdid_reference]
 
@@ -49,7 +50,7 @@ def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: lab
             raise Exception(f"{previous_lidvid} does not have a corresponding LidVid in the new collection")
 
 
-def _check_lidvid_increment(previous_lidvid: pds4.LidVid, next_lidvid: pds4.LidVid, same=True, minor=True, major=True):
+def _check_lidvid_increment(previous_lidvid: LidVid, next_lidvid: LidVid, same=True, minor=True, major=True):
     allowed = ([previous_lidvid] if same else []) + \
               ([previous_lidvid.inc_minor()] if minor else []) + \
               ([previous_lidvid.inc_major()] if major else [])
@@ -108,8 +109,8 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
             raise Exception(f"{next_lidvid} must contain exactly as many modification details as {prev_lidvid}")
 
 
-def check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collection_lidvids: Set[pds4.LidVid]):
-    bundle_member_lidvids = set(pds4.LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
+def check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collection_lidvids: Set[LidVid]):
+    bundle_member_lidvids = set(LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
     bundle_lidvid = bundle.identification_area.lidvid
     if not collection_lidvids == bundle_member_lidvids:
         raise Exception(f"{bundle_lidvid} does not contain the expected collection list: "

@@ -11,6 +11,7 @@ from labeltypes import DocumentFile, DocumentEdition, Document, SoftwareProgram,
     ProcessingInformation, DisciplineArea, FileArea, TimeCoordinates, ContextArea, ModificationDetail, \
     ModificationHistory, IdentificationArea, ProductLabel, ObservingSystem, ObservingSystemComponent, \
     InternalReference, BundleMemberEntry
+from lids import LidVid
 
 
 def extract_collection(collection: bs4.Tag, checksum: str) -> ProductLabel:
@@ -83,7 +84,7 @@ def _extract_identification_area(identification_area: bs4.Tag) -> Identification
     modification_history = _extract(identification_area.Modification_History, _extract_modification_history)
 
     return IdentificationArea(
-        lidvid=pds4.LidVid.assemble(lid, vid),
+        lidvid=LidVid.assemble(lid, vid),
         collection_id=_extract_collection_id(lid),
         modification_history=modification_history
     )

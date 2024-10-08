@@ -21,22 +21,24 @@ def main():
 
     logging.basicConfig(level=logging.INFO)
     args = parser.parse_args()
-    logger.info(f'Previous Bundle Directory: {args.previous_bundle_directoty}')
-    logger.info(f'New Bundle Directory: {args.new_bundle_directoty}')
-    if args.supersede():
+    logger.info(f'Previous Bundle Directory: {args.previous_bundle_directory}')
+    logger.info(f'New Bundle Directory: {args.new_bundle_directory}')
+    if args.supersede:
         logger.info(f'Merged Bundle Directory: {args.supersede}')
 
     check_ready(args.previous_bundle_directory, args.new_bundle_directory)
 
-    if args.supersede():
+    if args.supersede:
         supersede(args.previous_bundle_directory, args.new_bundle_directory, args.supersede)
 
 
 def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_directory):
-    print(f"TODO: Supersede {previous_bundle_directory} with new data from {new_bundle_directory} into {merged_bundle_directory}")
+    logger.info(f"TODO: Supersede {previous_bundle_directory} with new data from {new_bundle_directory} into {merged_bundle_directory}")
 
 
 def check_ready(previous_bundle_directory, new_bundle_directory):
+    logger.info(f"Checking readiness of new bundle {new_bundle_directory} against {previous_bundle_directory}")
+
     previous_bundles, previous_collections, previous_products = load_local_bundle(previous_bundle_directory)
     for bundle in previous_bundles:
         print(bundle.label.checksum)
@@ -49,7 +51,7 @@ def check_ready(previous_bundle_directory, new_bundle_directory):
     check_bundle_against_collections(new_bundles[0], new_collections)
 
     for new_collection in new_collections:
-        new_collection_lid = LidVid.parse(new_collection.label.identification_area.lidvid).lid
+        new_collection_lid = new_collection.label.identification_area.lidvid.lid
         previous_collections = [x for x in previous_collections if x.label.identification_area.lidvid.lid == new_collection_lid]
         if previous_collections:
             previous_collection = previous_collections[0]
@@ -74,6 +76,7 @@ def check_collection_against_previous(previous_collection: pds4.CollectionProduc
 
 
 def load_local_bundle(path: str):
+    logger.info(f'Loading bundle: {path}')
     filepaths = localclient.get_file_paths(path)
     label_paths = [x for x in filepaths if x.endswith(".xml")]
 
