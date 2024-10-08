@@ -59,15 +59,18 @@ def check_ready(previous_bundle_directory, new_bundle_directory):
 
 
 def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, new_bundle: pds4.BundleProduct):
+    logger.info(f"Checking new bundle label {new_bundle.label.identification_area.lidvid} against previous bundle label {previous_bundle.label.identification_area.lidvid}")
     validator.check_bundle_increment(previous_bundle.label, new_bundle.label)
 
 
 def check_bundle_against_collections(bundle: pds4.BundleProduct, collections: Iterable[pds4.CollectionProduct]):
+    logger.info(f"Checking bundle label {bundle.label.identification_area.lidvid} against existing collections")
     collection_lidvids = [x.label.identification_area.lidvid for x in collections]
     validator.check_bundle_for_latest_collections(bundle.label, set(collection_lidvids))
 
 
 def check_collection_against_previous(previous_collection: pds4.CollectionProduct, new_collection: pds4.CollectionProduct):
+    logger.info(f"Checking new collection label {new_collection.label.identification_area.lidvid} against previous collection {previous_collection.label.identification_area.lidvid}")
     validator.check_for_modification_history(previous_collection.label)
     validator.check_for_modification_history(new_collection.label)
     validator.check_for_preserved_modification_history(previous_collection.label, new_collection.label)
