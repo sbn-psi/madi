@@ -41,11 +41,11 @@ def check_ready(previous_bundle_directory, new_bundle_directory):
 
     previous_bundles, previous_collections, previous_products = load_local_bundle(previous_bundle_directory)
     for bundle in previous_bundles:
-        print(bundle.label.checksum)
+        logger.info(f'Previous bundle checksum: {bundle.label.checksum}')
 
     new_bundles, new_collections, new_products = load_local_bundle(new_bundle_directory)
     for bundle in new_bundles:
-        print(bundle.label.checksum)
+        logger.info(f'New bundle checksum: {bundle.label.checksum}')
 
     check_bundle_against_previous(previous_bundles[0], new_bundles[0])
     check_bundle_against_collections(new_bundles[0], new_collections)
