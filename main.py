@@ -12,6 +12,10 @@ def main():
     previous_bundle_directory = sys.argv[1]
     new_bundle_directory = sys.argv[2]
 
+    check_ready(previous_bundle_directory, new_bundle_directory)
+
+
+def check_ready(previous_bundle_directory, new_bundle_directory):
     previous_bundles, previous_collections, previous_products = load_local_bundle(previous_bundle_directory)
     for bundle in previous_bundles:
         print(bundle.label.checksum)
