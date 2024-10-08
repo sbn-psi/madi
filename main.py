@@ -6,13 +6,18 @@ import validator
 import localclient
 from typing import Iterable
 from pds4 import LidVid
+import argparse
 
 
 def main():
-    previous_bundle_directory = sys.argv[1]
-    new_bundle_directory = sys.argv[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("previous_bundle_directory", type=str)
+    parser.add_argument("new_bundle_directory", type=str)
+    parser.add_argument("-s", "--supersede", type=str)
 
-    check_ready(previous_bundle_directory, new_bundle_directory)
+    args = parser.parse_args()
+
+    check_ready(args.previous_bundle_directory, args.new_bundle_directory)
 
 
 def check_ready(previous_bundle_directory, new_bundle_directory):
