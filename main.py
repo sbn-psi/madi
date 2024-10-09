@@ -2,6 +2,7 @@
 import sys
 from dataclasses import dataclass
 
+import paths
 import pds4
 import validator
 import localclient
@@ -59,9 +60,16 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
 
 def report_superseded(products_to_keep: List[pds4.Pds4Product], products_to_supersede: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product], label: str = "Products"):
     logger.info(f"{label} to supersede: {[str(x.label.identification_area.lidvid) for x in products_to_supersede]}")
+    report_new_paths(products_to_supersede, True)
     logger.info(f"{label} to keep: {[str(x.label.identification_area.lidvid) for x in products_to_keep]}")
+    report_new_paths(products_to_keep)
     logger.info(f"New {label.lower()}: {[str(x.label.identification_area.lidvid) for x in new_products]}")
+    report_new_paths(new_products)
 
+
+def report_new_paths(products: List[pds4.Pds4Product], superseded=False):
+    for p in products:
+        logger.info(f"{p.label.identification_area.lidvid} will be moved to {paths.generate_product_dir(p, superseded)}")
 
 
 def find_superseded(previous_products: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product]):
