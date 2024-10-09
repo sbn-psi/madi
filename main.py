@@ -49,35 +49,42 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
     new_fullbundle = load_local_bundle(new_bundle_directory)
 
     previous_bundles_to_keep, previous_bundles_to_supersede = find_superseded(previous_fullbundle.bundles, new_fullbundle.bundles)
-    report_superseded(previous_bundles_to_keep, previous_bundles_to_supersede, new_fullbundle.bundles, "Bundles")
+    report_superseded(previous_bundles_to_keep, previous_bundles_to_supersede, new_fullbundle.bundles, previous_bundle_directory, new_bundle_directory, merged_bundle_directory, "Bundles")
 
     previous_collections_to_keep, previous_collections_to_supersede = find_superseded(previous_fullbundle.collections, new_fullbundle.collections)
-    report_superseded(previous_collections_to_keep, previous_collections_to_supersede, new_fullbundle.collections, "Collections")
+    report_superseded(previous_collections_to_keep, previous_collections_to_supersede, new_fullbundle.collections, previous_bundle_directory, new_bundle_directory, merged_bundle_directory, "Collections")
 
     previous_products_to_keep, previous_products_to_supersede = find_superseded(previous_fullbundle.products, new_fullbundle.products)
-    report_superseded(previous_products_to_keep, previous_products_to_supersede, new_fullbundle.products, "Products")
+    report_superseded(previous_products_to_keep, previous_products_to_supersede, new_fullbundle.products, previous_bundle_directory, new_bundle_directory, merged_bundle_directory, "Products")
 
 
-def report_superseded(products_to_keep: List[pds4.Pds4Product], products_to_supersede: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product], label: str = "Products"):
+def report_superseded(products_to_keep: List[pds4.Pds4Product],
+                      products_to_supersede: List[pds4.Pds4Product],
+                      new_products: List[pds4.Pds4Product],
+                      previous_bundle_dir,
+                      new_bundle_dir,
+                      merged_bundle_dir,
+                      label: str = "Products"):
     logger.info(f"{label} to supersede: {[str(x.label.identification_area.lidvid) for x in products_to_supersede]}")
-    report_new_paths(products_to_supersede, True)
+    report_new_paths(products_to_supersede, previous_bundle_dir, merged_bundle_dir, True)
     logger.info(f"{label} to keep: {[str(x.label.identification_area.lidvid) for x in products_to_keep]}")
-    report_new_paths(products_to_keep)
+    report_new_paths(products_to_keep, previous_bundle_dir, merged_bundle_dir)
     logger.info(f"New {label.lower()}: {[str(x.label.identification_area.lidvid) for x in new_products]}")
-    report_new_paths(new_products)
+    report_new_paths(new_products, new_bundle_dir, merged_bundle_dir)
 
 
-def report_new_paths(products: List[pds4.Pds4Product], superseded=False):
+def report_new_paths(products: List[pds4.Pds4Product], old_base, new_base, superseded=False):
     for p in products:
-        logger.info(f"{p.label.identification_area.lidvid} will be moved to {paths.generate_product_dir(p, superseded)}")
+        logger.info(f"{p.label.identification_area.lidvid} will be moved to "
+                    f"{paths.relocate_path(paths.generate_product_dir(p, superseded), old_base, new_base)}")
 
 
 def find_superseded(previous_products: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product]):
     new_product_lids = set(x.label.identification_area.lidvid.lid for x in new_products)
     previous_products_to_keep = [x for x in previous_products if
-                                x.label.identification_area.lidvid.lid not in new_product_lids]
+                                 x.label.identification_area.lidvid.lid not in new_product_lids]
     previous_products_to_supersede = [x for x in previous_products if
-                                x.label.identification_area.lidvid.lid in new_product_lids]
+                                      x.label.identification_area.lidvid.lid in new_product_lids]
     return previous_products_to_keep, previous_products_to_supersede
 
 
