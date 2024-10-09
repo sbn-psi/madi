@@ -87,6 +87,12 @@ class CollectionInventory:
         for lidvid in new_inventory.secondary.values():
             self.add_secondary(lidvid)
 
+    def to_csv(self) -> str:
+        return "\r\n".join(itertools.chain(
+            sorted((f'P,{x}' for x in self.primary.values())),
+            sorted((f'S,{x}' for x in self.secondary.values()))
+        ))
+
 
 class BundleProduct(Pds4Product):
     def __init__(self, bundle_label: labeltypes.ProductLabel, url: str = None, path: str = None):

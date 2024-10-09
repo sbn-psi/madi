@@ -46,6 +46,8 @@ def main():
         supersede(args.previous_bundle_directory, args.new_bundle_directory, args.supersede)
 
 
+
+
 def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_directory):
     logger.info(f"TODO: Supersede {previous_bundle_directory} with new data from {new_bundle_directory} into {merged_bundle_directory}")
     previous_fullbundle = load_local_bundle(previous_bundle_directory)
@@ -71,6 +73,25 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
                                   new_fullbundle.bundles,
                                   new_fullbundle.products), new_bundle_directory, merged_bundle_directory)
 
+    do_copy_data(previous_products_to_keep, previous_bundle_directory, merged_bundle_directory)
+    do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
+    do_copy_data(new_fullbundle.products, new_bundle_directory, merged_bundle_directory)
+
+    #copy_unmodified_collections()
+    generate_collections(previous_collections_to_supersede, new_fullbundle.collections, previous_bundle_directory, merged_bundle_directory)
+
+
+def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product], new_collections: List[pds4.CollectionProduct], previous_bundle_directory, merged_bundle_directory):
+    for previous in previous_collections_to_supersede:
+        if isinstance(previous, pds4.CollectionProduct):
+            new_collection = [x for x in new_collections if x.label.identification_area.lidvid.lid.collection == previous.label.identification_area.lidvid.lid.collection][0]
+            inventory = pds4.CollectionInventory()
+            inventory.ingest_new_inventory(previous.inventory)
+            inventory.ingest_new_inventory(new_collection.inventory)
+
+            inventory_path = paths.relocate_path(previous.inventory_path, previous_bundle_directory, merged_bundle_directory)
+            with open(inventory_path, 'w') as f:
+                f.write(inventory.to_csv())
 
 
 def report_superseded(products_to_keep: List[pds4.Pds4Product],
@@ -100,6 +121,20 @@ def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, supe
         dirname = os.path.dirname(new_path)
         os.makedirs(dirname, exist_ok=True)
         shutil.copy(p.label_path, new_path)
+
+
+def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False):
+    for p in products:
+        if isinstance(p, pds4.BasicProduct):
+            for d in p.data_paths:
+                new_path = paths.relocate_path(paths.generate_product_path(p, d, superseded), old_base, new_base)
+                logger.info(f'{d} -> {new_path}')
+                dirname = os.path.dirname(new_path)
+                os.makedirs(dirname, exist_ok=True)
+                shutil.copy(d, new_path)
+        else:
+            logger.info(f'Skipping: {p.label.identification_area.lidvid}')
+
 
 def find_superseded(previous_products: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product]):
     new_product_lids = set(x.label.identification_area.lidvid.lid for x in new_products)
