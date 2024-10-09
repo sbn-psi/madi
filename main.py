@@ -48,20 +48,20 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
     new_fullbundle = load_local_bundle(new_bundle_directory)
 
     previous_bundles_to_keep, previous_bundles_to_supersede = find_superseded(previous_fullbundle.bundles, new_fullbundle.bundles)
-
-    logger.info(f"Bundles to supersede: {[str(x.label.identification_area.lidvid) for x in previous_bundles_to_supersede]}")
-    logger.info(f"Bundles to keep: {[str(x.label.identification_area.lidvid) for x in previous_bundles_to_keep]}")
-    logger.info(f"New bundles: {[str(x.label.identification_area.lidvid) for x in new_fullbundle.bundles]}")
+    report_superseded(previous_bundles_to_keep, previous_bundles_to_supersede, new_fullbundle.bundles, "Bundles")
 
     previous_collections_to_keep, previous_collections_to_supersede = find_superseded(previous_fullbundle.collections, new_fullbundle.collections)
-    logger.info(f"Collections to supersede: {[str(x.label.identification_area.lidvid) for x in previous_collections_to_supersede]}")
-    logger.info(f"Collections to keep: {[str(x.label.identification_area.lidvid) for x in previous_collections_to_keep]}")
-    logger.info(f"New collections: {[str(x.label.identification_area.lidvid) for x in new_fullbundle.collections]}")
+    report_superseded(previous_collections_to_keep, previous_collections_to_supersede, new_fullbundle.collections, "Collections")
 
     previous_products_to_keep, previous_products_to_supersede = find_superseded(previous_fullbundle.products, new_fullbundle.products)
-    logger.info(f"Products to supersede: {[str(x.label.identification_area.lidvid) for x in previous_products_to_supersede]}")
-    logger.info(f"Products to keep: {[str(x.label.identification_area.lidvid) for x in previous_products_to_keep]}")
-    logger.info(f"New bundles: {[str(x.label.identification_area.lidvid) for x in new_fullbundle.products]}")
+    report_superseded(previous_products_to_keep, previous_products_to_supersede, new_fullbundle.products, "Products")
+
+
+def report_superseded(products_to_keep: List[pds4.Pds4Product], products_to_supersede: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product], label: str = "Products"):
+    logger.info(f"{label} to supersede: {[str(x.label.identification_area.lidvid) for x in products_to_supersede]}")
+    logger.info(f"{label} to keep: {[str(x.label.identification_area.lidvid) for x in products_to_keep]}")
+    logger.info(f"New {label.lower()}: {[str(x.label.identification_area.lidvid) for x in new_products]}")
+
 
 
 def find_superseded(previous_products: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product]):
