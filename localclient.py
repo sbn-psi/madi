@@ -27,8 +27,9 @@ def fetchbundle(path: str) -> BundleProduct:
 
 def fetchproduct(path: str) -> BasicProduct:
     product_label = fetchlabel(path)
-    data_paths = paths.rebase_filenames(path, [product_label.file_area.file_name]) if product_label.file_area else []
-    document_paths = paths.rebase_filenames(path, product_label.document.filenames()) if product_label.document else []
+    dirname = os.path.dirname(path)
+    data_paths = paths.rebase_filenames(dirname, [product_label.file_area.file_name]) if product_label.file_area else []
+    document_paths = paths.rebase_filenames(dirname, product_label.document.filenames()) if product_label.document else []
 
     return BasicProduct(product_label, label_path=path, data_paths=data_paths + document_paths)
 
