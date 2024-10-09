@@ -1,7 +1,7 @@
 import pds4
 import label
 import labeltypes
-from typing import Dict, Set
+from typing import Dict, Set, Iterable
 
 from lids import Lid, LidVid
 import logging
@@ -9,8 +9,28 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def check_collection_increment(previous_collection: pds4.CollectionInventory,
-                               next_collection: pds4.CollectionInventory):
+def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, new_bundle: pds4.BundleProduct):
+    logger.info(f"Checking new bundle label {new_bundle.label.identification_area.lidvid} against previous bundle label {previous_bundle.label.identification_area.lidvid}")
+    _check_bundle_increment(previous_bundle.label, new_bundle.label)
+
+
+def check_bundle_against_collections(bundle: pds4.BundleProduct, collections: Iterable[pds4.CollectionProduct]):
+    logger.info(f"Checking bundle label {bundle.label.identification_area.lidvid} against existing collections")
+    collection_lidvids = [x.label.identification_area.lidvid for x in collections]
+    _check_bundle_for_latest_collections(bundle.label, set(collection_lidvids))
+
+
+def check_collection_against_previous(previous_collection: pds4.CollectionProduct, new_collection: pds4.CollectionProduct):
+    logger.info(f"Checking new collection label {new_collection.label.identification_area.lidvid} against previous collection {previous_collection.label.identification_area.lidvid}")
+    _check_for_modification_history(previous_collection.label)
+    _check_for_modification_history(new_collection.label)
+    _check_for_preserved_modification_history(previous_collection.label, new_collection.label)
+    _check_collection_increment(previous_collection.inventory, new_collection.inventory)
+    _check_collection_duplicates(previous_collection.inventory, new_collection.inventory)
+
+
+def _check_collection_increment(previous_collection: pds4.CollectionInventory,
+                                next_collection: pds4.CollectionInventory):
     logger.info(f'Checking version increment for collection inventory members')
     _check_dict_increment(previous_collection.primary, next_collection.primary)
     _check_dict_increment(previous_collection.secondary, next_collection.secondary)
@@ -24,7 +44,7 @@ def _check_dict_increment(previous_lidvids: Dict[Lid, LidVid], next_lidvids: Dic
             _check_lidvid_increment(previous_lidvid, lidvid, same=False)
 
 
-def check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: label.ProductLabel):
+def _check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: label.ProductLabel):
     logger.info(f'Checking version increment for {next_bundle.identification_area.lidvid} against {previous_bundle.identification_area.lidvid}')
 
     previous_bundle_lidvid = previous_bundle.identification_area.lidvid
@@ -65,8 +85,8 @@ def _check_lidvid_increment(previous_lidvid: LidVid, next_lidvid: LidVid, same=T
         raise Exception(f"Invalid lidvid: {next_lidvid}. Must be one of {[x.__str__() for x in allowed]}")
 
 
-def check_collection_duplicates(previous_collection: pds4.CollectionInventory,
-                                next_collection: pds4.CollectionInventory):
+def _check_collection_duplicates(previous_collection: pds4.CollectionInventory,
+                                 next_collection: pds4.CollectionInventory):
     logger.info(f'Checking collection inventory for duplicate products')
 
     duplicates = next_collection.products().intersection(previous_collection.products())
@@ -74,7 +94,7 @@ def check_collection_duplicates(previous_collection: pds4.CollectionInventory,
         raise Exception(f'Collection had duplicate products: {", ".join(x.__str__() for x in duplicates)}')
 
 
-def check_for_modification_history(lbl: label.ProductLabel):
+def _check_for_modification_history(lbl: label.ProductLabel):
     logger.info(f'Checking modification history for {lbl.identification_area.lidvid}')
     lidvid = lbl.identification_area.lidvid
     vid = lidvid.vid.__str__()
@@ -86,8 +106,8 @@ def check_for_modification_history(lbl: label.ProductLabel):
         raise Exception(f'{lidvid} does not have a current modification history. Versions seen were: {versions}')
 
 
-def check_for_preserved_modification_history(previous_collection: label.ProductLabel,
-                                             next_collection: label.ProductLabel):
+def _check_for_preserved_modification_history(previous_collection: label.ProductLabel,
+                                              next_collection: label.ProductLabel):
     logger.info(f'Checking consistency of modification history for {next_collection.identification_area.lidvid} against {previous_collection.identification_area.lidvid}')
     previous_details = previous_collection.identification_area.modification_history.modification_details
     next_details = next_collection.identification_area.modification_history.modification_details
@@ -120,7 +140,7 @@ def check_for_preserved_modification_history(previous_collection: label.ProductL
             raise Exception(f"{next_lidvid} must contain exactly as many modification details as {prev_lidvid}")
 
 
-def check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collection_lidvids: Set[LidVid]):
+def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collection_lidvids: Set[LidVid]):
     logger.info(f'Checking collections references in {bundle.identification_area.lidvid}')
     bundle_member_lidvids = set(LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
     bundle_lidvid = bundle.identification_area.lidvid

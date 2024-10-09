@@ -88,35 +88,16 @@ def check_ready(previous_bundle_directory, new_bundle_directory):
 
 
 def do_checkready(new_fullbundle: FullBundle, previous_fullbundle: FullBundle):
-    check_bundle_against_previous(previous_fullbundle.bundles[0], new_fullbundle.bundles[0])
-    check_bundle_against_collections(new_fullbundle.bundles[0], new_fullbundle.collections)
+    validator.check_bundle_against_previous(previous_fullbundle.bundles[0], new_fullbundle.bundles[0])
+    validator.check_bundle_against_collections(new_fullbundle.bundles[0], new_fullbundle.collections)
     for new_collection in new_fullbundle.collections:
         new_collection_lid = new_collection.label.identification_area.lidvid.lid
         previous_collections = [x for x in previous_fullbundle.collections if
                                 x.label.identification_area.lidvid.lid == new_collection_lid]
         if previous_collections:
             previous_collection = previous_collections[0]
-            check_collection_against_previous(previous_collection, new_collection)
+            validator.check_collection_against_previous(previous_collection, new_collection)
 
-
-def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, new_bundle: pds4.BundleProduct):
-    logger.info(f"Checking new bundle label {new_bundle.label.identification_area.lidvid} against previous bundle label {previous_bundle.label.identification_area.lidvid}")
-    validator.check_bundle_increment(previous_bundle.label, new_bundle.label)
-
-
-def check_bundle_against_collections(bundle: pds4.BundleProduct, collections: Iterable[pds4.CollectionProduct]):
-    logger.info(f"Checking bundle label {bundle.label.identification_area.lidvid} against existing collections")
-    collection_lidvids = [x.label.identification_area.lidvid for x in collections]
-    validator.check_bundle_for_latest_collections(bundle.label, set(collection_lidvids))
-
-
-def check_collection_against_previous(previous_collection: pds4.CollectionProduct, new_collection: pds4.CollectionProduct):
-    logger.info(f"Checking new collection label {new_collection.label.identification_area.lidvid} against previous collection {previous_collection.label.identification_area.lidvid}")
-    validator.check_for_modification_history(previous_collection.label)
-    validator.check_for_modification_history(new_collection.label)
-    validator.check_for_preserved_modification_history(previous_collection.label, new_collection.label)
-    validator.check_collection_increment(previous_collection.inventory, new_collection.inventory)
-    validator.check_collection_duplicates(previous_collection.inventory, new_collection.inventory)
 
 
 def load_local_bundle(path: str) -> FullBundle:
