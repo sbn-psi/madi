@@ -37,7 +37,7 @@ class CollectionProduct(Pds4Product):
         self.inventory_path = inventory_path
 
 
-class CollectionInventory(Pds4Product):
+class CollectionInventory:
     def __init__(self, primary: set[LidVid] = None, secondary: set[LidVid] = None):
         self.primary = dict((x.lid, x) for x in primary) if primary is not None else {}
         self.secondary = dict((x.lid, x) for x in secondary) if primary is not None else {}
