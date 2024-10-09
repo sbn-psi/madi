@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import itertools
+import os
+import shutil
 import sys
 from dataclasses import dataclass
 
@@ -57,6 +60,18 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
     previous_products_to_keep, previous_products_to_supersede = find_superseded(previous_fullbundle.products, new_fullbundle.products)
     report_superseded(previous_products_to_keep, previous_products_to_supersede, new_fullbundle.products, previous_bundle_directory, new_bundle_directory, merged_bundle_directory, "Products")
 
+    do_copy_label(itertools.chain(previous_bundles_to_keep,
+                                  previous_collections_to_keep,
+                                  previous_products_to_keep,), previous_bundle_directory, merged_bundle_directory)
+    do_copy_label(itertools.chain(previous_bundles_to_supersede,
+                                  previous_collections_to_supersede,
+                                  previous_products_to_supersede), previous_bundle_directory, merged_bundle_directory, superseded=True)
+
+    do_copy_label(itertools.chain(new_fullbundle.collections,
+                                  new_fullbundle.bundles,
+                                  new_fullbundle.products), new_bundle_directory, merged_bundle_directory)
+
+
 
 def report_superseded(products_to_keep: List[pds4.Pds4Product],
                       products_to_supersede: List[pds4.Pds4Product],
@@ -76,8 +91,15 @@ def report_superseded(products_to_keep: List[pds4.Pds4Product],
 def report_new_paths(products: List[pds4.Pds4Product], old_base, new_base, superseded=False):
     for p in products:
         logger.info(f"{p.label.identification_area.lidvid} will be moved to "
-                    f"{paths.relocate_path(paths.generate_product_dir(p, superseded), old_base, new_base)}")
+                    f"{paths.relocate_path(paths.generate_product_path(p, p.label_path, superseded), old_base, new_base)}")
 
+
+def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False):
+    for p in products:
+        new_path = paths.relocate_path(paths.generate_product_path(p, p.label_path, superseded), old_base, new_base)
+        dirname = os.path.dirname(new_path)
+        os.makedirs(dirname, exist_ok=True)
+        shutil.copy(p.label_path, new_path)
 
 def find_superseded(previous_products: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product]):
     new_product_lids = set(x.label.identification_area.lidvid.lid for x in new_products)

@@ -16,9 +16,10 @@ def relocate_path(path: str, old_base: str, new_base: str):
     return path
 
 
-def generate_product_dir(p: Pds4Product, superseded=False):
-    product_dirname = os.path.dirname(p.label_path)
-    if superseded and "SUPERSEDED" not in p.label_path:
+def generate_product_path(p: Pds4Product, path: str, superseded=False):
+    product_dirname = os.path.dirname(path)
+    filename = os.path.basename(path)
+    if superseded and "SUPERSEDED" not in path:
         vid = p.label.identification_area.lidvid.vid
-        return os.path.join(product_dirname, "SUPERSEDED", f'V{vid.major}_{vid.minor}')
-    return product_dirname
+        return os.path.join(product_dirname, "SUPERSEDED", f'V{vid.major}_{vid.minor}', filename)
+    return path
