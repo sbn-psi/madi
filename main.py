@@ -75,7 +75,7 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
     do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
     do_copy_data(new_fullbundle.products, new_bundle_directory, merged_bundle_directory)
 
-    #copy_unmodified_collections()
+    copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, new_bundle_directory)
     generate_collections(previous_collections_to_supersede, new_fullbundle.collections, previous_bundle_directory, merged_bundle_directory)
 
 
@@ -121,6 +121,17 @@ def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, supe
         shutil.copy(p.label_path, new_path)
 
 
+def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_base: str, new_base: str) -> None:
+    for c in collections:
+        if isinstance(c, pds4.CollectionProduct):
+            new_path = paths.relocate_path(paths.generate_product_path(c, c.inventory_path, False), old_base, new_base)
+            dirname = os.path.dirname(new_path)
+            os.makedirs(dirname, exist_ok=True)
+            shutil.copy(c.inventory_path, new_path)
+        else:
+            logger.info(f'Skipping non-collection product: {c.label.identification_area.lidvid}')
+
+
 def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
     for p in products:
         if isinstance(p, pds4.BasicProduct):
@@ -131,7 +142,7 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, super
                 os.makedirs(dirname, exist_ok=True)
                 shutil.copy(d, new_path)
         else:
-            logger.info(f'Skipping: {p.label.identification_area.lidvid}')
+            logger.info(f'Skipping non-basic product: {p.label.identification_area.lidvid}')
 
 
 def find_superseded(previous_products: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product]) -> Tuple[List[pds4.Pds4Product], List[pds4.Pds4Product]]:
