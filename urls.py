@@ -1,4 +1,4 @@
-def is_ignored(candidate: str):
+def is_ignored(candidate: str) -> bool:
     return any([".DS_Store" in candidate, candidate.startswith("?")])
 
 
@@ -6,7 +6,7 @@ def is_below(base: str, candidate: str) -> bool:
     return candidate.startswith(base) or (not "://" in candidate and not candidate.startswith("/") and not candidate.startswith(".."))
 
 
-def is_absolute(candidate: str):
+def is_absolute(candidate: str) -> bool:
     return "://" in candidate
 
 

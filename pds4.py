@@ -1,12 +1,11 @@
-from dataclasses import dataclass
 from typing import List
 import itertools
 import csv
 
-import label
 import labeltypes
 
 from lids import LidVid
+
 
 class Pds4Product:
     def __init__(self, product_label: labeltypes.ProductLabel, label_url: str = None, label_path: str = None):
@@ -45,7 +44,7 @@ class CollectionInventory:
         if any(x in self.primary.keys() for x in self.secondary.keys()):
             raise Exception("Some products exist in both primary and secondary collections")
 
-    def add_primary(self, lidvid: LidVid):
+    def add_primary(self, lidvid: LidVid) -> None:
         lid = lidvid.lid
         if lid in self.secondary:
             raise Exception("Product already exists as a secondary member and can't be made primary")
@@ -55,7 +54,7 @@ class CollectionInventory:
                 raise Exception("Product is not newer than the version that already exists in the inventory")
         self.primary[lid] = lidvid
 
-    def add_secondary(self, lidvid: LidVid):
+    def add_secondary(self, lidvid: LidVid) -> None:
         lid = lidvid.lid
         if lid in self.primary:
             raise Exception("Product already exists as a primary member and can't be made secondary")
@@ -81,7 +80,7 @@ class CollectionInventory:
                 inventory.add_secondary(lidvid)
         return inventory
 
-    def ingest_new_inventory(self, new_inventory: "CollectionInventory"):
+    def ingest_new_inventory(self, new_inventory: "CollectionInventory") -> None:
         for lidvid in new_inventory.primary.values():
             self.add_primary(lidvid)
         for lidvid in new_inventory.secondary.values():

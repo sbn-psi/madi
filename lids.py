@@ -18,7 +18,7 @@ class Lid:
             product=tokens[5] if len(tokens) >= 6 else None
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.product and self.collection:
             return f"{self.prefix}:{self.bundle}:{self.collection}:{self.product}"
         if self.collection:
@@ -32,7 +32,7 @@ class Vid:
     minor: int
 
     @staticmethod
-    def parse(vidstr: str):
+    def parse(vidstr: str) -> 'Vid':
         tokens = vidstr.split(".")
         return Vid(
             major=int(tokens[0]),
@@ -55,17 +55,16 @@ class LidVid:
     vid: Vid
 
     @staticmethod
-    def parse(lidvidstr: str):
+    def parse(lidvidstr: str) -> 'LidVid':
         lid, vid = lidvidstr.split("::")
         return LidVid.assemble(lid, vid)
 
     @staticmethod
-    def assemble(lid: str, vid: str):
+    def assemble(lid: str, vid: str) -> 'LidVid':
         return LidVid(
             lid=Lid.parse(lid),
             vid=Vid.parse(vid)
         )
-
 
     def __str__(self):
         return f'{self.lid}::{self.vid}'
