@@ -32,9 +32,11 @@ def main() -> None:
     parser.add_argument("previous_bundle_directory", type=str)
     parser.add_argument("new_bundle_directory", type=str)
     parser.add_argument("-s", "--supersede", type=str)
+    parser.add_argument("-d", "--debug", action="store_true")
 
-    logging.basicConfig(level=logging.INFO)
     args = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
     logger.info(f'Previous Bundle Directory: {args.previous_bundle_directory}')
     logger.info(f'New Bundle Directory: {args.new_bundle_directory}')
     if args.supersede:
@@ -137,7 +139,7 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, super
         if isinstance(p, pds4.BasicProduct):
             for d in p.data_paths:
                 new_path = paths.relocate_path(paths.generate_product_path(d, superseded=superseded, vid=p.label.identification_area.lidvid.vid), old_base, new_base)
-                logger.info(f'{d} -> {new_path}')
+                logger.debug(f'{d} -> {new_path}')
                 dirname = os.path.dirname(new_path)
                 os.makedirs(dirname, exist_ok=True)
                 shutil.copy(d, new_path)
