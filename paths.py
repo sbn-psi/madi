@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Iterable, List
 
-from pds4 import Pds4Product
+from lids import Vid
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +17,9 @@ def relocate_path(path: str, old_base: str, new_base: str) -> str:
     return path
 
 
-def generate_product_path(p: Pds4Product, path: str, superseded=False) -> str:
+def generate_product_path(path: str, superseded=False, vid: Vid = None) -> str:
     product_dirname = os.path.dirname(path)
     filename = os.path.basename(path)
     if superseded and "SUPERSEDED" not in path:
-        vid = p.label.identification_area.lidvid.vid
         return os.path.join(product_dirname, "SUPERSEDED", f'V{vid.major}_{vid.minor}', filename)
     return path

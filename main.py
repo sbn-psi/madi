@@ -110,12 +110,12 @@ def report_superseded(products_to_keep: List[pds4.Pds4Product],
 def report_new_paths(products: List[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
     for p in products:
         logger.info(f"{p.label.identification_area.lidvid} will be moved to "
-                    f"{paths.relocate_path(paths.generate_product_path(p, p.label_path, superseded), old_base, new_base)}")
+                    f"{paths.relocate_path(paths.generate_product_path(p.label_path, superseded=superseded, vid=p.label.identification_area.lidvid.vid), old_base, new_base)}")
 
 
 def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
     for p in products:
-        new_path = paths.relocate_path(paths.generate_product_path(p, p.label_path, superseded), old_base, new_base)
+        new_path = paths.relocate_path(paths.generate_product_path(p.label_path, superseded=superseded, vid=p.label.identification_area.lidvid.vid), old_base, new_base)
         dirname = os.path.dirname(new_path)
         os.makedirs(dirname, exist_ok=True)
         shutil.copy(p.label_path, new_path)
@@ -124,7 +124,7 @@ def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, supe
 def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_base: str, new_base: str) -> None:
     for c in collections:
         if isinstance(c, pds4.CollectionProduct):
-            new_path = paths.relocate_path(paths.generate_product_path(c, c.inventory_path, False), old_base, new_base)
+            new_path = paths.relocate_path(paths.generate_product_path(c.inventory_path), old_base, new_base)
             dirname = os.path.dirname(new_path)
             os.makedirs(dirname, exist_ok=True)
             shutil.copy(c.inventory_path, new_path)
@@ -136,7 +136,7 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, super
     for p in products:
         if isinstance(p, pds4.BasicProduct):
             for d in p.data_paths:
-                new_path = paths.relocate_path(paths.generate_product_path(p, d, superseded), old_base, new_base)
+                new_path = paths.relocate_path(paths.generate_product_path(d, superseded=superseded, vid=p.label.identification_area.lidvid.vid), old_base, new_base)
                 logger.info(f'{d} -> {new_path}')
                 dirname = os.path.dirname(new_path)
                 os.makedirs(dirname, exist_ok=True)
