@@ -17,6 +17,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class FullBundle:
     bundles: List[BundleProduct]
@@ -50,25 +51,51 @@ def main() -> None:
 
 
 def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_directory) -> None:
-    logger.info(f"TODO: Supersede {previous_bundle_directory} with new data from {new_bundle_directory} into {merged_bundle_directory}")
+    logger.info(f"TODO: Supersede {previous_bundle_directory} "
+                f"with new data from {new_bundle_directory} into {merged_bundle_directory}")
     previous_fullbundle = load_local_bundle(previous_bundle_directory)
     new_fullbundle = load_local_bundle(new_bundle_directory)
 
-    previous_bundles_to_keep, previous_bundles_to_supersede = find_superseded(previous_fullbundle.bundles, new_fullbundle.bundles)
-    report_superseded(previous_bundles_to_keep, previous_bundles_to_supersede, new_fullbundle.bundles, previous_bundle_directory, new_bundle_directory, merged_bundle_directory, "Bundles")
+    previous_bundles_to_keep, previous_bundles_to_supersede = find_superseded(previous_fullbundle.bundles,
+                                                                              new_fullbundle.bundles)
+    report_superseded(previous_bundles_to_keep,
+                      previous_bundles_to_supersede,
+                      new_fullbundle.bundles,
+                      previous_bundle_directory,
+                      new_bundle_directory,
+                      merged_bundle_directory,
+                      "Bundles")
 
-    previous_collections_to_keep, previous_collections_to_supersede = find_superseded(previous_fullbundle.collections, new_fullbundle.collections)
-    report_superseded(previous_collections_to_keep, previous_collections_to_supersede, new_fullbundle.collections, previous_bundle_directory, new_bundle_directory, merged_bundle_directory, "Collections")
+    previous_collections_to_keep, previous_collections_to_supersede = find_superseded(previous_fullbundle.collections,
+                                                                                      new_fullbundle.collections)
+    report_superseded(previous_collections_to_keep,
+                      previous_collections_to_supersede,
+                      new_fullbundle.collections,
+                      previous_bundle_directory,
+                      new_bundle_directory,
+                      merged_bundle_directory,
+                      "Collections")
 
-    previous_products_to_keep, previous_products_to_supersede = find_superseded(previous_fullbundle.products, new_fullbundle.products)
-    report_superseded(previous_products_to_keep, previous_products_to_supersede, new_fullbundle.products, previous_bundle_directory, new_bundle_directory, merged_bundle_directory, "Products")
+    previous_products_to_keep, previous_products_to_supersede = find_superseded(previous_fullbundle.products,
+                                                                                new_fullbundle.products)
+    report_superseded(previous_products_to_keep,
+                      previous_products_to_supersede,
+                      new_fullbundle.products,
+                      previous_bundle_directory,
+                      new_bundle_directory,
+                      merged_bundle_directory,
+                      "Products")
 
     do_copy_label(itertools.chain(previous_bundles_to_keep,
                                   previous_collections_to_keep,
-                                  previous_products_to_keep,), previous_bundle_directory, merged_bundle_directory)
+                                  previous_products_to_keep,),
+                  previous_bundle_directory,
+                  merged_bundle_directory)
     do_copy_label(itertools.chain(previous_bundles_to_supersede,
                                   previous_collections_to_supersede,
-                                  previous_products_to_supersede), previous_bundle_directory, merged_bundle_directory, superseded=True)
+                                  previous_products_to_supersede),
+                  previous_bundle_directory,
+                  merged_bundle_directory, superseded=True)
 
     do_copy_label(itertools.chain(new_fullbundle.collections,
                                   new_fullbundle.bundles,
@@ -79,18 +106,28 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
     do_copy_data(new_fullbundle.products, new_bundle_directory, merged_bundle_directory)
 
     copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, new_bundle_directory)
-    generate_collections(previous_collections_to_supersede, new_fullbundle.collections, previous_bundle_directory, merged_bundle_directory)
+    generate_collections(previous_collections_to_supersede,
+                         new_fullbundle.collections,
+                         previous_bundle_directory,
+                         merged_bundle_directory)
 
 
-def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product], new_collections: List[pds4.CollectionProduct], previous_bundle_directory, merged_bundle_directory) -> None:
+def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product],
+                         new_collections: List[pds4.CollectionProduct],
+                         previous_bundle_directory,
+                         merged_bundle_directory) -> None:
     for previous in previous_collections_to_supersede:
         if isinstance(previous, pds4.CollectionProduct):
-            new_collection = [x for x in new_collections if x.label.identification_area.lidvid.lid.collection == previous.label.identification_area.lidvid.lid.collection][0]
+            collection_id = previous.label.identification_area.lidvid.lid.collection
+            new_collection = [x for x in new_collections
+                              if x.label.identification_area.lidvid.lid.collection == collection_id][0]
             inventory = pds4.CollectionInventory()
             inventory.ingest_new_inventory(previous.inventory)
             inventory.ingest_new_inventory(new_collection.inventory)
 
-            inventory_path = paths.relocate_path(previous.inventory_path, previous_bundle_directory, merged_bundle_directory)
+            inventory_path = paths.relocate_path(previous.inventory_path,
+                                                 previous_bundle_directory,
+                                                 merged_bundle_directory)
             with open(inventory_path, 'w') as f:
                 f.write(inventory.to_csv())
 
@@ -112,13 +149,17 @@ def report_superseded(products_to_keep: List[pds4.Pds4Product],
 
 def report_new_paths(products: List[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
     for p in products:
-        logger.info(f"{p.label.identification_area.lidvid} will be moved to "
-                    f"{paths.relocate_path(paths.generate_product_path(p.label_path, superseded=superseded, vid=p.label.identification_area.lidvid.vid), old_base, new_base)}")
+        vid = p.label.identification_area.lidvid.vid
+        versioned_path = paths.generate_product_path(p.label_path, superseded=superseded, vid=vid)
+        new_path = paths.relocate_path(versioned_path, old_base, new_base)
+        logger.info(f"{p.label.identification_area.lidvid} will be moved to {new_path}")
 
 
 def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
     for p in products:
-        new_path = paths.relocate_path(paths.generate_product_path(p.label_path, superseded=superseded, vid=p.label.identification_area.lidvid.vid), old_base, new_base)
+        vid = p.label.identification_area.lidvid.vid
+        versioned_path = paths.generate_product_path(p.label_path, superseded=superseded, vid=vid)
+        new_path = paths.relocate_path(versioned_path, old_base, new_base)
         dirname = os.path.dirname(new_path)
         os.makedirs(dirname, exist_ok=True)
         shutil.copy(p.label_path, new_path)
@@ -139,7 +180,9 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, super
     for p in products:
         if isinstance(p, pds4.BasicProduct):
             for d in p.data_paths:
-                new_path = paths.relocate_path(paths.generate_product_path(d, superseded=superseded, vid=p.label.identification_area.lidvid.vid), old_base, new_base)
+                vid = p.label.identification_area.lidvid.vid
+                versioned_path = paths.generate_product_path(d, superseded=superseded, vid=vid)
+                new_path = paths.relocate_path(versioned_path, old_base, new_base)
                 logger.debug(f'{d} -> {new_path}')
                 dirname = os.path.dirname(new_path)
                 os.makedirs(dirname, exist_ok=True)
@@ -148,7 +191,8 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, super
             logger.info(f'Skipping non-basic product: {p.label.identification_area.lidvid}')
 
 
-def find_superseded(previous_products: List[pds4.Pds4Product], new_products: List[pds4.Pds4Product]) -> Tuple[List[pds4.Pds4Product], List[pds4.Pds4Product]]:
+def find_superseded(previous_products: List[pds4.Pds4Product],
+                    new_products: List[pds4.Pds4Product]) -> Tuple[List[pds4.Pds4Product], List[pds4.Pds4Product]]:
     new_product_lids = set(x.label.identification_area.lidvid.lid for x in new_products)
     previous_products_to_keep = [x for x in previous_products if
                                  x.label.identification_area.lidvid.lid not in new_product_lids]
@@ -188,13 +232,18 @@ def load_local_bundle(path: str) -> FullBundle:
     filepaths = localclient.get_file_paths(path)
     label_paths = [x for x in filepaths if x.endswith(".xml")]
 
-    collections = [localclient.fetchcollection(path) for path in label_paths if is_collection(path) and not is_superseded(path)]
-    bundles = [localclient.fetchbundle(path) for path in label_paths if is_bundle(path) and not is_superseded(path)]
+    collections = [localclient.fetchcollection(path)
+                   for path in label_paths if is_collection(path) and not is_superseded(path)]
+    bundles = [localclient.fetchbundle(path)
+               for path in label_paths if is_bundle(path) and not is_superseded(path)]
     products = [localclient.fetchproduct(path) for path in label_paths if is_basic(path) and not is_superseded(path)]
 
-    superseded_collections = [localclient.fetchcollection(path) for path in label_paths if is_collection(path) and is_superseded(path)]
-    superseded_bundles = [localclient.fetchbundle(path) for path in label_paths if is_bundle(path) and is_superseded(path)]
-    superseded_products = [localclient.fetchproduct(path) for path in label_paths if is_basic(path) and is_superseded(path)]
+    superseded_collections = [localclient.fetchcollection(path)
+                              for path in label_paths if is_collection(path) and is_superseded(path)]
+    superseded_bundles = [localclient.fetchbundle(path)
+                          for path in label_paths if is_bundle(path) and is_superseded(path)]
+    superseded_products = [localclient.fetchproduct(path)
+                           for path in label_paths if is_basic(path) and is_superseded(path)]
 
     if len(bundles) == 0:
         raise Exception(f"Could not find bundle product in: {path}")
