@@ -33,10 +33,11 @@ def main() -> None:
     parser.add_argument("new_bundle_directory", type=str)
     parser.add_argument("-s", "--supersede", type=str)
     parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument("-l", "--logfile", type=str)
 
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
+    logging.basicConfig(filename=args.logfile, level=logging.DEBUG if args.debug else logging.INFO)
     logger.info(f'Previous Bundle Directory: {args.previous_bundle_directory}')
     logger.info(f'New Bundle Directory: {args.new_bundle_directory}')
     if args.supersede:
