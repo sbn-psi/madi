@@ -111,6 +111,11 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
                          previous_bundle_directory,
                          merged_bundle_directory)
 
+    copy_previously_superseded_products(
+        previous_fullbundle.superseded_products,
+        previous_fullbundle.collections,
+        previous_fullbundle.bundles)
+
 
 def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product],
                          new_collections: List[pds4.CollectionProduct],
@@ -163,6 +168,13 @@ def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, supe
         dirname = os.path.dirname(new_path)
         os.makedirs(dirname, exist_ok=True)
         shutil.copy(p.label_path, new_path)
+
+
+def copy_previously_superseded_products(
+        products: Iterable[pds4.BasicProduct],
+        collections: Iterable[pds4.CollectionProduct],
+        bundles: Iterable[pds4.BundleProduct]):
+    pass
 
 
 def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_base: str, new_base: str) -> None:
