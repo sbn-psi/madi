@@ -114,7 +114,9 @@ def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_dir
     copy_previously_superseded_products(
         previous_fullbundle.superseded_products,
         previous_fullbundle.collections,
-        previous_fullbundle.bundles)
+        previous_fullbundle.bundles,
+        previous_bundle_directory,
+        merged_bundle_directory)
 
 
 def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product],
@@ -173,8 +175,19 @@ def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, supe
 def copy_previously_superseded_products(
         products: Iterable[pds4.BasicProduct],
         collections: Iterable[pds4.CollectionProduct],
-        bundles: Iterable[pds4.BundleProduct]):
-    pass
+        bundles: Iterable[pds4.BundleProduct],
+        old_base: str,
+        new_base: str):
+    for bundle in bundles:
+        copy_to_path(bundle.label_path, paths.relocate_path(bundle.label_path, old_base, new_base))
+    for collection in collections:
+        copy_to_path(collection.label_path, paths.relocate_path(collection.label_path, old_base, new_base))
+        copy_to_path(collection.inventory_path, paths.relocate_path(collection.inventory_path, old_base, new_base))
+    for product in products:
+        copy_to_path(product.label_path, paths.relocate_path(product.label_path, old_base, new_base))
+        for data_path in product.data_paths:
+            if os.path.exists(data_path):
+                copy_to_path(data_path, paths.relocate_path(data_path, old_base, new_base))
 
 
 def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_base: str, new_base: str) -> None:
