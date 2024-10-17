@@ -239,19 +239,25 @@ def check_ready(previous_bundle_directory, new_bundle_directory) -> None:
     for bundle in new_fullbundle.bundles:
         logger.info(f'New bundle checksum: {bundle.label.checksum}')
 
-    do_checkready(new_fullbundle, previous_fullbundle)
+    errors = do_checkready(new_fullbundle, previous_fullbundle)
+    if len(errors) > 0:
+        for e in errors:
+            logger.error(e.message)
+        raise Exception("Validation errors encountered")
 
 
-def do_checkready(new_fullbundle: FullBundle, previous_fullbundle: FullBundle) -> None:
-    validator.check_bundle_against_previous(previous_fullbundle.bundles[0], new_fullbundle.bundles[0])
-    validator.check_bundle_against_collections(new_fullbundle.bundles[0], new_fullbundle.collections)
+def do_checkready(new_fullbundle: FullBundle, previous_fullbundle: FullBundle) -> List[validator.ValidationError]:
+    errors = []
+    errors.extend(validator.check_bundle_against_previous(previous_fullbundle.bundles[0], new_fullbundle.bundles[0]))
+    errors.extend(validator.check_bundle_against_collections(new_fullbundle.bundles[0], new_fullbundle.collections))
     for new_collection in new_fullbundle.collections:
         new_collection_lid = new_collection.label.identification_area.lidvid.lid
         previous_collections = [x for x in previous_fullbundle.collections if
                                 x.label.identification_area.lidvid.lid == new_collection_lid]
         if previous_collections:
             previous_collection = previous_collections[0]
-            validator.check_collection_against_previous(previous_collection, new_collection)
+            errors.extend(validator.check_collection_against_previous(previous_collection, new_collection))
+    return errors
 
 
 def load_local_bundle(path: str) -> FullBundle:
