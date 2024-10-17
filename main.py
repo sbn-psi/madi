@@ -181,9 +181,7 @@ def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_bas
     for c in collections:
         if isinstance(c, pds4.CollectionProduct):
             new_path = paths.relocate_path(paths.generate_product_path(c.inventory_path), old_base, new_base)
-            dirname = os.path.dirname(new_path)
-            os.makedirs(dirname, exist_ok=True)
-            shutil.copy(c.inventory_path, new_path)
+            copy_to_path(c.inventory_path, new_path)
         else:
             logger.info(f'Skipping non-collection product: {c.label.identification_area.lidvid}')
 
@@ -195,12 +193,16 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, super
                 vid = p.label.identification_area.lidvid.vid
                 versioned_path = paths.generate_product_path(d, superseded=superseded, vid=vid)
                 new_path = paths.relocate_path(versioned_path, old_base, new_base)
-                logger.debug(f'{d} -> {new_path}')
-                dirname = os.path.dirname(new_path)
-                os.makedirs(dirname, exist_ok=True)
-                shutil.copy(d, new_path)
+                copy_to_path(d, new_path)
         else:
             logger.info(f'Skipping non-basic product: {p.label.identification_area.lidvid}')
+
+
+def copy_to_path(src_path: str, dest_path: str):
+    logger.debug(f'{src_path} -> {dest_path}')
+    dirname = os.path.dirname(dest_path)
+    os.makedirs(dirname, exist_ok=True)
+    shutil.copy(src_path, dest_path)
 
 
 def find_superseded(previous_products: List[pds4.Pds4Product],
