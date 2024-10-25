@@ -23,5 +23,5 @@ def generate_product_path(path: str, superseded=False, vid: Vid = None) -> str:
     if superseded and "SUPERSEDED" not in path:
         if vid is None:
             raise Exception("Vid must be specified when superseding a product for the first time")
-        return os.path.join(product_dirname, "SUPERSEDED", f'V{vid.major}_{vid.minor}', filename)
+        return os.path.join(product_dirname, "SUPERSEDED", f'v{vid.major}_{vid.minor}', filename)
     return path
