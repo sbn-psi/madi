@@ -63,7 +63,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: la
 
     previous_bundle_lidvid = previous_bundle.identification_area.lidvid
     next_bundle_lidvid = next_bundle.identification_area.lidvid
-    _check_lidvid_increment(previous_bundle_lidvid, next_bundle_lidvid, same=False)
+    errors.extend(_check_lidvid_increment(previous_bundle_lidvid, next_bundle_lidvid, same=False))
 
     for x in previous_bundle.bundle_member_entries + next_bundle.bundle_member_entries:
         if not x.livdid_reference:
@@ -80,7 +80,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: la
         matching_lidvids = [x for x in previous_lidvids if x.lid == next_lidvid.lid]
         if len(matching_lidvids):
             matching_lidvid = matching_lidvids[0]
-            _check_lidvid_increment(matching_lidvid, next_lidvid)
+            errors.extend(_check_lidvid_increment(matching_lidvid, next_lidvid))
         else:
             errors.append(ValidationError(f"{next_lidvid} does not have a corresponding LidVid in the previous collection"))
 
