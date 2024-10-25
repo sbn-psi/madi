@@ -66,6 +66,8 @@ def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> N
     do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
     do_copy_data(new_fullbundle.products, new_bundle_directory, merged_bundle_directory)
 
+    do_copy_inventory(previous_collections_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
+
     copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, new_bundle_directory)
     generate_collections(previous_collections_to_supersede,
                          new_fullbundle.collections,
@@ -156,6 +158,18 @@ def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_bas
         if isinstance(c, pds4.CollectionProduct):
             new_path = paths.relocate_path(paths.generate_product_path(c.inventory_path), old_base, new_base)
             copy_to_path(c.inventory_path, new_path)
+        else:
+            logger.info(f'Skipping non-collection product: {c.label.identification_area.lidvid}')
+
+
+def do_copy_inventory(collections: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
+    for c in collections:
+        if isinstance(c, pds4.CollectionProduct):
+            d = c.inventory_path
+            vid = c.label.identification_area.lidvid.vid
+            versioned_path = paths.generate_product_path(d, superseded=superseded, vid=vid)
+            new_path = paths.relocate_path(versioned_path, old_base, new_base)
+            copy_to_path(d, new_path)
         else:
             logger.info(f'Skipping non-collection product: {c.label.identification_area.lidvid}')
 
