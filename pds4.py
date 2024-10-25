@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List
 import itertools
 import csv
@@ -96,3 +97,12 @@ class CollectionInventory:
 class BundleProduct(Pds4Product):
     def __init__(self, bundle_label: labeltypes.ProductLabel, url: str = None, path: str = None):
         super().__init__(bundle_label, url, path)
+
+@dataclass
+class FullBundle:
+    bundles: List[BundleProduct]
+    superseded_bundles: List[BundleProduct]
+    collections: List[CollectionProduct]
+    superseded_collections: List[CollectionProduct]
+    products: List[BasicProduct]
+    superseded_products: List[BasicProduct]

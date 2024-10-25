@@ -18,14 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class FullBundle:
-    bundles: List[BundleProduct]
-    superseded_bundles: List[BundleProduct]
-    collections: List[CollectionProduct]
-    superseded_collections: List[CollectionProduct]
-    products: List[BasicProduct]
-    superseded_products: List[BasicProduct]
+
 
 
 def main() -> None:
@@ -246,7 +239,7 @@ def check_ready(previous_bundle_directory, new_bundle_directory) -> None:
         raise Exception("Validation errors encountered")
 
 
-def do_checkready(new_fullbundle: FullBundle, previous_fullbundle: FullBundle) -> List[validator.ValidationError]:
+def do_checkready(new_fullbundle: pds4.FullBundle, previous_fullbundle: pds4.FullBundle) -> List[validator.ValidationError]:
     errors = []
     errors.extend(validator.check_bundle_against_previous(previous_fullbundle.bundles[0], new_fullbundle.bundles[0]))
     errors.extend(validator.check_bundle_against_collections(new_fullbundle.bundles[0], new_fullbundle.collections))
@@ -260,7 +253,7 @@ def do_checkready(new_fullbundle: FullBundle, previous_fullbundle: FullBundle) -
     return errors
 
 
-def load_local_bundle(path: str) -> FullBundle:
+def load_local_bundle(path: str) -> pds4.FullBundle:
     logger.info(f'Loading bundle: {path}')
     filepaths = localclient.get_file_paths(path)
     label_paths = [x for x in filepaths if x.endswith(".xml")]
@@ -280,7 +273,7 @@ def load_local_bundle(path: str) -> FullBundle:
 
     if len(bundles) == 0:
         raise Exception(f"Could not find bundle product in: {path}")
-    return FullBundle(bundles, superseded_bundles, collections, superseded_collections, products, superseded_products)
+    return pds4.FullBundle(bundles, superseded_bundles, collections, superseded_collections, products, superseded_products)
 
 
 def is_basic(x: str) -> bool:
