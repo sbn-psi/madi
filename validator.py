@@ -45,7 +45,7 @@ def check_collection_against_previous(previous_collection: pds4.CollectionProduc
     errors = []
     errors.extend(_check_for_modification_history(previous_collection.label))
     errors.extend(_check_for_modification_history(new_collection.label))
-    if len(errors) == 0:
+    if not errors:
         errors.extend(_check_for_preserved_modification_history(previous_collection.label, new_collection.label))
 
     errors.extend(_check_collection_increment(previous_collection.inventory, new_collection.inventory))
@@ -94,25 +94,25 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: la
         if not x.livdid_reference:
             errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid"))
 
-    previous_lidvids = [LidVid.parse(x.livdid_reference)
+    previous_collection_lidvids = [LidVid.parse(x.livdid_reference)
                         for x in previous_bundle.bundle_member_entries
                         if x.livdid_reference]
-    next_lidvids = [LidVid.parse(x.livdid_reference)
+    next_collection_lidvids = [LidVid.parse(x.livdid_reference)
                     for x in next_bundle.bundle_member_entries
                     if x.livdid_reference]
 
-    for next_lidvid in next_lidvids:
-        matching_lidvids = [x for x in previous_lidvids if x.lid == next_lidvid.lid]
-        if len(matching_lidvids):
+    for next_collection_lidvid in next_collection_lidvids:
+        matching_lidvids = [x for x in previous_collection_lidvids if x.lid == next_collection_lidvid.lid]
+        if matching_lidvids:
             matching_lidvid = matching_lidvids[0]
-            errors.extend(_check_lidvid_increment(matching_lidvid, next_lidvid))
+            errors.extend(_check_lidvid_increment(matching_lidvid, next_collection_lidvid))
         else:
-            errors.append(ValidationError(f"{next_lidvid} does not have a corresponding LidVid in the previous collection"))
+            errors.append(ValidationError(f"{next_collection_lidvid} does not have a corresponding LidVid in the previous collection"))
 
-    for previous_lidvid in previous_lidvids:
-        matching_lidvids = [x for x in previous_lidvids if x.lid == previous_lidvid.lid]
-        if not len(matching_lidvids):
-            errors.append(ValidationError(f"{previous_lidvid} does not have a corresponding LidVid in the new collection"))
+    for previous_collection_lidvid in previous_collection_lidvids:
+        matching_lidvids = [x for x in previous_collection_lidvids if x.lid == previous_collection_lidvid.lid]
+        if not matching_lidvids:
+            errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the new collection"))
 
     return errors
 
@@ -145,7 +145,7 @@ def _check_collection_duplicates(previous_collection: pds4.CollectionInventory,
     logger.info(f'Checking collection inventory for duplicate products')
     errors = []
     duplicates = next_collection.products().intersection(previous_collection.products())
-    if len(duplicates):
+    if duplicates:
         errors.append(ValidationError(f'Collection had duplicate products: {", ".join(x.__str__() for x in duplicates)}'))
     return errors
 
@@ -191,11 +191,11 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
         errors.append(ValidationError(f"{next_lidvid} must contain at least as many modification details as {prev_lidvid}"))
 
     if next_vid > prev_vid:
-        if not len(next_details) == len(previous_details) + 1:
+        if len(next_details) != len(previous_details) + 1:
             errors.append(ValidationError(f"{next_lidvid} must contain one more modification detail than {prev_lidvid}"))
 
     if next_vid == prev_vid:
-        if not len(next_details) == len(previous_details):
+        if len(next_details) != len(previous_details):
             errors.append(ValidationError(f"{next_lidvid} must contain exactly as many modification details as {prev_lidvid}"))
 
     return errors
