@@ -16,17 +16,31 @@ class ValidationError:
 
 
 def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, new_bundle: pds4.BundleProduct) -> List[ValidationError]:
+    """
+    Performs bundle level checks, comparing the new bundle to the previous bundle:
+        * Compare the bundle version numbers
+    """
     logger.info(f"Checking new bundle label {new_bundle.label.identification_area.lidvid} against previous bundle label {previous_bundle.label.identification_area.lidvid}")
     return _check_bundle_increment(previous_bundle.label, new_bundle.label)
 
 
 def check_bundle_against_collections(bundle: pds4.BundleProduct, collections: Iterable[pds4.CollectionProduct]) -> List[ValidationError]:
+    """
+    Compare the collections declared in the bundle to the collections that actually appear
+    """
     logger.info(f"Checking bundle label {bundle.label.identification_area.lidvid} against existing collections")
     collection_lidvids = [x.label.identification_area.lidvid for x in collections]
     return _check_bundle_for_latest_collections(bundle.label, set(collection_lidvids))
 
 
 def check_collection_against_previous(previous_collection: pds4.CollectionProduct, new_collection: pds4.CollectionProduct) -> List[ValidationError]:
+    """
+    Compare the discovered collections in the new bundle to the discovered collections in the previous bundle.
+        * Compare the modification histories of any bundles that correspond
+        * check that the version numbers are incremented correctly
+        * check that any products in the new collection inventory correctly supersede the products in the old inventory
+        * check that products in the new inventory do not duplicate the old inventory
+    """
     logger.info(f"Checking new collection label {new_collection.label.identification_area.lidvid} against previous collection {previous_collection.label.identification_area.lidvid}")
     errors = []
     errors.extend(_check_for_modification_history(previous_collection.label))
@@ -41,13 +55,20 @@ def check_collection_against_previous(previous_collection: pds4.CollectionProduc
 
 def _check_collection_increment(previous_collection: pds4.CollectionInventory,
                                 next_collection: pds4.CollectionInventory) -> List[ValidationError]:
+    """
+    Ensure that the LIDVIDs for all the products in a collection have been correctly incremented
+    """
     logger.info(f'Checking version increment for collection inventory members')
     errors = []
     errors.extend(_check_dict_increment(previous_collection.primary, next_collection.primary))
     errors.extend(_check_dict_increment(previous_collection.secondary, next_collection.secondary))
     return errors
 
+
 def _check_dict_increment(previous_lidvids: Dict[Lid, LidVid], next_lidvids: Dict[Lid, LidVid]) -> List[ValidationError]:
+    """
+    Ensure that the supplied new LIDVIDs have been correctly incremented from the previous LIDVIDs
+    """
     errors = []
     for lid in next_lidvids.keys():
         if lid in previous_lidvids.keys():
@@ -58,6 +79,10 @@ def _check_dict_increment(previous_lidvids: Dict[Lid, LidVid], next_lidvids: Dic
 
 
 def _check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: label.ProductLabel) -> List[ValidationError]:
+    """
+    Check that the LIDVIDs of both the bundle and any declared bundle member entries have been incremented
+    correctly.
+    """
     logger.info(f'Checking version increment for {next_bundle.identification_area.lidvid} against {previous_bundle.identification_area.lidvid}')
     errors = []
 
@@ -92,6 +117,14 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, next_bundle: la
     return errors
 
 def _check_lidvid_increment(previous_lidvid: LidVid, next_lidvid: LidVid, same=True, minor=True, major=True) -> List[ValidationError]:
+    """
+    Check that the provided new_lidvid is an allowable increment from the previous LIDVID.
+    There are three possible ways to increment a LIDVID that we recognize:
+        * Don't increment it at all
+        * Increment the minor version number e.g 1.1 -> 1.2
+        * Increment the major version number and reset the minor version number to 0 e.g. 1.1 -> 2.0
+    Flags control which of these methods we allow at the moment
+    """
     logger.info(f'Checking increment of {next_lidvid} against {previous_lidvid}')
     errors = []
     allowed = ([previous_lidvid] if same else []) + \
@@ -102,8 +135,13 @@ def _check_lidvid_increment(previous_lidvid: LidVid, next_lidvid: LidVid, same=T
     return errors
 
 
+
 def _check_collection_duplicates(previous_collection: pds4.CollectionInventory,
                                  next_collection: pds4.CollectionInventory) -> List[ValidationError]:
+    """
+    Ensure that the new collection does not have products that match the old collection.
+    Every product must be new or must supersede the old product
+    """
     logger.info(f'Checking collection inventory for duplicate products')
     errors = []
     duplicates = next_collection.products().intersection(previous_collection.products())
@@ -113,6 +151,9 @@ def _check_collection_duplicates(previous_collection: pds4.CollectionInventory,
 
 
 def _check_for_modification_history(lbl: label.ProductLabel) -> List[ValidationError]:
+    """
+    Verify that the modification history for a product exists and is current
+    """
     logger.info(f'Checking modification history for {lbl.identification_area.lidvid}')
     errors = []
     lidvid = lbl.identification_area.lidvid
@@ -128,6 +169,9 @@ def _check_for_modification_history(lbl: label.ProductLabel) -> List[ValidationE
 
 def _check_for_preserved_modification_history(previous_collection: label.ProductLabel,
                                               next_collection: label.ProductLabel) -> List[ValidationError]:
+    """
+    Verify that all of the modification history entries that were in the old product are also in the new product
+    """
     errors = []
     logger.info(f'Checking consistency of modification history for {next_collection.identification_area.lidvid} against {previous_collection.identification_area.lidvid}')
     previous_details = previous_collection.identification_area.modification_history.modification_details
@@ -162,8 +206,10 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
 
     return errors
 
-
 def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collection_lidvids: Set[LidVid]) -> List[ValidationError]:
+    """
+    Ensure that the discovered collections and the declared collections match
+    """
     logger.info(f'Checking collections references in {bundle.identification_area.lidvid}')
     errors = []
     bundle_member_lidvids = set(LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
