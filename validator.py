@@ -1,7 +1,7 @@
 import pds4
 import label
 import labeltypes
-from typing import Dict, Set, Iterable, List
+from typing import Dict, Set, Iterable, List, Tuple
 
 from lids import Lid, LidVid
 import logging
@@ -186,13 +186,7 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
     if len(next_details) >= len(previous_details):
         pairs = zip(previous_details, next_details[:len(previous_details)])
         for pair in pairs:
-            previous_detail: labeltypes.ModificationDetail
-            next_detail: labeltypes.ModificationDetail
-            previous_detail, next_detail = pair
-
-            if not previous_detail == next_detail:
-                errors.append(ValidationError(f'{next_lidvid} has a mismatched modification detail from {prev_lidvid}. '
-                                f'The old modification detail was {previous_detail}, and the new one was {next_detail}'))
+            errors.extend(_compare_modifcation_detail(pair, next_lidvid, prev_lidvid))
     else:
         errors.append(ValidationError(f"{next_lidvid} must contain at least as many modification details as {prev_lidvid}"))
 
@@ -205,6 +199,21 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
             errors.append(ValidationError(f"{next_lidvid} must contain exactly as many modification details as {prev_lidvid}"))
 
     return errors
+
+
+def _compare_modifcation_detail(pair: Tuple[labeltypes.ModificationDetail, labeltypes.ModificationDetail], next_lidvid: LidVid, prev_lidvid: LidVid) -> List[ValidationError]:
+    """
+    Ensures that two corresponding modification detail entries are the same
+    """
+    errors = []
+    previous_detail: labeltypes.ModificationDetail
+    next_detail: labeltypes.ModificationDetail
+    previous_detail, next_detail = pair
+    if not previous_detail == next_detail:
+        errors.append(ValidationError(f'{next_lidvid} has a mismatched modification detail from {prev_lidvid}. '
+                                      f'The old modification detail was {previous_detail}, and the new one was {next_detail}'))
+    return errors
+
 
 def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collection_lidvids: Set[LidVid]) -> List[ValidationError]:
     """
