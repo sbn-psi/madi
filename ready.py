@@ -1,4 +1,3 @@
-from bundleloader import  load_local_bundle
 import pds4
 import validator
 
@@ -7,14 +6,15 @@ logger = logging.getLogger(__name__)
 
 
 
-def check_ready(previous_bundle_directory, new_bundle_directory) -> None:
+def check_ready(previous_fullbundle, new_fullbundle) -> None:
+    previous_bundle_directory = previous_fullbundle.path
+    new_bundle_directory = new_fullbundle.path
+
     logger.info(f"Checking readiness of new bundle {new_bundle_directory} against {previous_bundle_directory}")
 
-    previous_fullbundle = load_local_bundle(previous_bundle_directory)
     for bundle in previous_fullbundle.bundles:
         logger.info(f'Previous bundle checksum: {bundle.label.checksum}')
 
-    new_fullbundle = load_local_bundle(new_bundle_directory)
     for bundle in new_fullbundle.bundles:
         logger.info(f'New bundle checksum: {bundle.label.checksum}')
 

@@ -2,6 +2,8 @@
 import sys
 import argparse
 
+import bundleloader
+import localclient
 from ready import check_ready
 
 import logging
@@ -30,10 +32,13 @@ def main() -> None:
     if args.supersede:
         logger.info(f'Merged Bundle Directory: {args.supersede}')
 
-    check_ready(args.previous_bundle_directory, args.new_bundle_directory)
+    previous_fullbundle = bundleloader.load_local_bundle(args.previous_bundle_directory)
+    new_fullbundle = bundleloader.load_local_bundle(args.new_bundle_directory)
+
+    check_ready(previous_fullbundle, new_fullbundle)
 
     if args.supersede:
-        supersede(args.previous_bundle_directory, args.new_bundle_directory, args.supersede)
+        supersede(previous_fullbundle, new_fullbundle, args.supersede)
 
 
 

@@ -100,6 +100,7 @@ class BundleProduct(Pds4Product):
 
 @dataclass
 class FullBundle:
+    path: str
     bundles: List[BundleProduct]
     superseded_bundles: List[BundleProduct]
     collections: List[CollectionProduct]

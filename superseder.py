@@ -6,16 +6,16 @@ from typing import List, Iterable, Tuple
 
 import paths
 import pds4
-from bundleloader import load_local_bundle
 
 logger = logging.getLogger(__name__)
 
 
-def supersede(previous_bundle_directory, new_bundle_directory, merged_bundle_directory) -> None:
+def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> None:
+    previous_bundle_directory = previous_fullbundle.path
+    new_bundle_directory = new_fullbundle.path
+
     logger.info(f"TODO: Supersede {previous_bundle_directory} "
                 f"with new data from {new_bundle_directory} into {merged_bundle_directory}")
-    previous_fullbundle = load_local_bundle(previous_bundle_directory)
-    new_fullbundle = load_local_bundle(new_bundle_directory)
 
     previous_bundles_to_keep, previous_bundles_to_supersede = find_superseded(previous_fullbundle.bundles,
                                                                               new_fullbundle.bundles)

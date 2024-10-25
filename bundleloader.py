@@ -24,7 +24,7 @@ def load_local_bundle(path: str) -> pds4.FullBundle:
 
     if len(bundles) == 0:
         raise Exception(f"Could not find bundle product in: {path}")
-    return pds4.FullBundle(bundles, superseded_bundles, collections, superseded_collections, products, superseded_products)
+    return pds4.FullBundle(path, bundles, superseded_bundles, collections, superseded_collections, products, superseded_products)
 
 
 def is_basic(x: str) -> bool:
