@@ -28,7 +28,7 @@ While not strictly required, it's a good idea to create a virtual environment be
 
 Once you create your virtual environment, you will need to activate it before running MADI or installing any dependencies
 
-`/path/to/madi $ source venv/bin activate`
+`/path/to/madi $ source venv/bin/activate`
 
 #### Deactivating the virtual environment
 
