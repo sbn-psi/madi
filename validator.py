@@ -21,7 +21,10 @@ def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, new_bundl
         * Compare the bundle version numbers
     """
     logger.info(f"Checking new bundle label {new_bundle.label.identification_area.lidvid} against previous bundle label {previous_bundle.label.identification_area.lidvid}")
-    return _check_bundle_increment(previous_bundle.label, new_bundle.label)
+    errors = []
+    errors.extend(_check_modification_history(new_bundle, previous_bundle))
+    errors.extend(_check_bundle_increment(previous_bundle.label, new_bundle.label))
+    return errors
 
 
 def check_bundle_against_collections(bundle: pds4.BundleProduct, collections: Iterable[pds4.CollectionProduct]) -> List[ValidationError]:
@@ -41,15 +44,22 @@ def check_collection_against_previous(previous_collection: pds4.CollectionProduc
         * check that any products in the new collection inventory correctly supersede the products in the old inventory
         * check that products in the new inventory do not duplicate the old inventory
     """
+    logger.info(f"Checking new product label {new_collection.label.identification_area.lidvid} against previous product {previous_collection.label.identification_area.lidvid}")
+    errors = []
+    errors.extend(_check_modification_history(new_collection, previous_collection))
+
+    errors.extend(_check_collection_increment(previous_collection.inventory, new_collection.inventory))
+    errors.extend(_check_collection_duplicates(previous_collection.inventory, new_collection.inventory))
+    return errors
+
+
+def _check_modification_history(new_collection: pds4.Pds4Product, previous_collection: pds4.Pds4Product):
     logger.info(f"Checking new collection label {new_collection.label.identification_area.lidvid} against previous collection {previous_collection.label.identification_area.lidvid}")
     errors = []
     errors.extend(_check_for_modification_history(previous_collection.label))
     errors.extend(_check_for_modification_history(new_collection.label))
     if not errors:
         errors.extend(_check_for_preserved_modification_history(previous_collection.label, new_collection.label))
-
-    errors.extend(_check_collection_increment(previous_collection.inventory, new_collection.inventory))
-    errors.extend(_check_collection_duplicates(previous_collection.inventory, new_collection.inventory))
     return errors
 
 
@@ -160,10 +170,10 @@ def _check_for_modification_history(lbl: label.ProductLabel) -> List[ValidationE
     vid = lidvid.vid.__str__()
     if lbl.identification_area.modification_history is None:
         errors.append(ValidationError(f"{lidvid} does not have a modification history"))
-
-    versions = [detail.version_id for detail in lbl.identification_area.modification_history.modification_details]
-    if vid not in versions:
-        errors.append(ValidationError(f'{lidvid} does not have a current modification history. Versions seen were: {versions}'))
+    else:
+        versions = [detail.version_id for detail in lbl.identification_area.modification_history.modification_details]
+        if vid not in versions:
+            errors.append(ValidationError(f'{lidvid} does not have a current modification history. Versions seen were: {versions}'))
 
     return errors
 
