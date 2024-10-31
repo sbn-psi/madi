@@ -50,7 +50,7 @@ MADI operations will require that you have both a delta bundle and the previous 
 * [Windows/Linux](https://rclone.org/commands/rclone_mount/)
 * [Mac](https://rclone.org/commands/rclone_nfsmount/)
 
-Not that this will still download the data on-demand, but you will not need to download the data in advance or store it all at once. 
+Note that this will still download the data on-demand, but you will not need to download the data in advance or store it all at once. 
 
 ## Usage - Readiness Check
 
