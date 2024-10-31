@@ -17,6 +17,7 @@ or download the latest version of the code from https://github.com/sbn-psi/madi/
 #### Required dependencies
 
 * beautifulsoup - (https://www.crummy.com/software/BeautifulSoup/) 
+* lxml - (https://lxml.de/)
 
 #### Creating a virtual environment
 
