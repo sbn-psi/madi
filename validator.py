@@ -11,6 +11,11 @@ logger = logging.getLogger(__name__)
 
 class ValidationError:
     def __init__(self, message: str, fatal: bool = False):
+        if fatal:
+            logger.fatal(message)
+        else:
+            logger.error(message)
+            
         self.message = message
         self.fatal = fatal
 
