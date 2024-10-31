@@ -21,7 +21,7 @@ or download the latest version of the code from https://github.com/sbn-psi/madi/
 
 #### Creating a virtual environment
 
-While not strictly required, it's a good idea to create a virtual environment before installing the dependencies. 
+While not strictly required, it's a good idea to create a [virtual environment](https://docs.python.org/3/library/venv.html) before installing the dependencies. 
 
 `$ python3 -m venv /path/to/madi/venv`
 
