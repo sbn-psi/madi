@@ -57,7 +57,6 @@ def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> N
                                   previous_products_to_supersede),
                   previous_bundle_directory,
                   merged_bundle_directory, superseded=True)
-
     do_copy_label(itertools.chain(new_fullbundle.collections,
                                   new_fullbundle.bundles,
                                   new_fullbundle.products), new_bundle_directory, merged_bundle_directory)
@@ -65,8 +64,11 @@ def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> N
     do_copy_data(previous_products_to_keep, previous_bundle_directory, merged_bundle_directory)
     do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
     do_copy_data(new_fullbundle.products, new_bundle_directory, merged_bundle_directory)
+    logger.warning(f"TODO: Copy bundle readme if present")
 
     do_copy_inventory(previous_collections_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
+    collection_lidvids = ','.join(str(x.label.identification_area.lidvid) for x in previous_collections_to_supersede)
+    logger.warning(f"TODO: Update labels for {collection_lidvids}")
 
     copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, new_bundle_directory)
     generate_collections(previous_collections_to_supersede,

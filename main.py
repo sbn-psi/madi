@@ -26,7 +26,10 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    logging.basicConfig(filename=args.logfile, level=logging.DEBUG if args.debug else logging.INFO)
+    logging.basicConfig(
+        filename=args.logfile,
+        format='%(asctime)s;%(levelname)s;%(name)s; %(message)s',
+        level=logging.DEBUG if args.debug else logging.INFO)
     logger.info(f'Previous Bundle Directory: {args.previous_bundle_directory}')
     logger.info(f'New Bundle Directory: {args.new_bundle_directory}')
     if args.supersede:
