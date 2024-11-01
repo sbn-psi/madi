@@ -22,7 +22,7 @@ def check_ready(previous_fullbundle, new_fullbundle) -> None:
 
     errors = do_checkready(new_fullbundle, previous_fullbundle)
 
-    logger.info(f"Checking readiness of new bundle {new_bundle_directory} against {previous_bundle_directory}")
+    logger.info(f"Checking readiness of new bundle {new_bundle_directory} against {previous_bundle_directory} - Complete")
 
     if len(errors) > 0:
         for e in errors:
