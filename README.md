@@ -17,18 +17,19 @@ or download the latest version of the code from https://github.com/sbn-psi/madi/
 #### Required dependencies
 
 * beautifulsoup - (https://www.crummy.com/software/BeautifulSoup/) 
+* lxml - (https://lxml.de/)
 
 #### Creating a virtual environment
 
-While not strictly required, it's a good idea to create a virtual environment before installing the dependencies. 
+While not strictly required, it's a good idea to create a [virtual environment](https://docs.python.org/3/library/venv.html) before installing the dependencies. 
 
-`/path/to/madi $ python3 -m venv venv`
+`$ python3 -m venv /path/to/madi/venv`
 
 #### Activating the virtual environment
 
 Once you create your virtual environment, you will need to activate it before running MADI or installing any dependencies
 
-`/path/to/madi $ source venv/bin/activate`
+`$ source /path/to/madi/venv/bin/activate`
 
 #### Deactivating the virtual environment
 
@@ -40,7 +41,7 @@ Once you are done, you may deactivate the virtual environment with the `deactiva
 
 The dependencies are listed in the requirements.txt file, so you can install them all at once by running:
 
-`(venv) /path/to/madi $ pip install -r requirements.txt`
+`(venv)  $ pip install -r /path/to/madi/requirements.txt`
 
 ### Ensuring you have the data
 
@@ -49,13 +50,13 @@ MADI operations will require that you have both a delta bundle and the previous 
 * [Windows/Linux](https://rclone.org/commands/rclone_mount/)
 * [Mac](https://rclone.org/commands/rclone_nfsmount/)
 
-Not that this will still download the data on-demand, but you will not need to download the data in advance or store it all at once. 
+Note that this will still download the data on-demand, but you will not need to download the data in advance or store it all at once. 
 
 ## Usage - Readiness Check
 
 By default, MADI does not actually supersede anything, and only runs a readiness check. You can perform this readiness check with the following command:
 
-`(venv) /path/to/madi $ ./main.py previous_bundle_directory delta_bundle_directory`
+`(venv)  $ /path/to/madi/main.py previous_bundle_directory delta_bundle_directory`
 
 Once you run this, MADI will perform a series of checks on your bundle, collections, and data products, and send the results to a terminal. Any problems will appear with the prefix WARNING or ERROR.
 
