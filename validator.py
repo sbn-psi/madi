@@ -53,8 +53,8 @@ def check_collection_against_previous(previous_collection: pds4.CollectionProduc
     errors = []
     errors.extend(_check_modification_history(new_collection, previous_collection))
 
-    errors.extend(_check_collection_increment(previous_collection.inventory, new_collection.inventory))
-    errors.extend(_check_collection_duplicates(previous_collection.inventory, new_collection.inventory))
+    errors.extend(_check_collection_increment(previous_collection, new_collection))
+    errors.extend(_check_collection_duplicates(previous_collection, new_collection))
     return errors
 
 
@@ -68,15 +68,15 @@ def _check_modification_history(new_collection: pds4.Pds4Product, previous_colle
     return errors
 
 
-def _check_collection_increment(previous_collection: pds4.CollectionInventory,
-                                next_collection: pds4.CollectionInventory) -> List[ValidationError]:
+def _check_collection_increment(previous_collection: pds4.CollectionProduct,
+                                next_collection: pds4.CollectionProduct) -> List[ValidationError]:
     """
     Ensure that the LIDVIDs for all the products in a collection have been correctly incremented
     """
-    logger.info(f'Checking version increment for collection inventory members')
+    logger.info(f'Checking version increment for collection inventory members: {next_collection.label.identification_area.lidvid}')
     errors = []
-    errors.extend(_check_dict_increment(previous_collection.primary, next_collection.primary))
-    errors.extend(_check_dict_increment(previous_collection.secondary, next_collection.secondary))
+    errors.extend(_check_dict_increment(previous_collection.inventory.primary, next_collection.inventory.primary))
+    errors.extend(_check_dict_increment(previous_collection.inventory.secondary, next_collection.inventory.secondary))
     return errors
 
 
@@ -150,16 +150,15 @@ def _check_lidvid_increment(previous_lidvid: LidVid, next_lidvid: LidVid, same=T
     return errors
 
 
-
-def _check_collection_duplicates(previous_collection: pds4.CollectionInventory,
-                                 next_collection: pds4.CollectionInventory) -> List[ValidationError]:
+def _check_collection_duplicates(previous_collection: pds4.CollectionProduct,
+                                 next_collection: pds4.CollectionProduct) -> List[ValidationError]:
     """
     Ensure that the new collection does not have products that match the old collection.
     Every product must be new or must supersede the old product
     """
-    logger.info(f'Checking collection inventory for duplicate products')
+    logger.info(f'Checking collection inventory for duplicate products: {next_collection.label.identification_area.lidvid}')
     errors = []
-    duplicates = next_collection.products().intersection(previous_collection.products())
+    duplicates = next_collection.inventory.products().intersection(previous_collection.inventory.products())
     if duplicates:
         errors.append(ValidationError(f'Collection had duplicate products: {", ".join(x.__str__() for x in duplicates)}'))
     return errors
