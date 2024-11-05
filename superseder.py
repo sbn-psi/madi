@@ -10,7 +10,7 @@ import pds4
 logger = logging.getLogger(__name__)
 
 
-def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> None:
+def supersede(previous_fullbundle: pds4.FullBundle, new_fullbundle: pds4.FullBundle, merged_bundle_directory) -> None:
     previous_bundle_directory = previous_fullbundle.path
     new_bundle_directory = new_fullbundle.path
 
@@ -64,7 +64,10 @@ def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> N
     do_copy_data(previous_products_to_keep, previous_bundle_directory, merged_bundle_directory)
     do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
     do_copy_data(new_fullbundle.products, new_bundle_directory, merged_bundle_directory)
-    logger.warning(f"TODO: Copy bundle readme if present")
+
+    do_copy_readme(previous_fullbundle.superseded_bundles, previous_bundle_directory, merged_bundle_directory, superseded=True)
+    do_copy_readme(previous_fullbundle.bundles, previous_bundle_directory, merged_bundle_directory, superseded=True)
+    do_copy_readme(new_fullbundle.bundles, new_bundle_directory, merged_bundle_directory)
 
     do_copy_inventory(previous_collections_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
     collection_lidvids = ','.join(str(x.label.identification_area.lidvid) for x in previous_collections_to_supersede)
@@ -186,6 +189,15 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, super
                 copy_to_path(d, new_path)
         else:
             logger.info(f'Skipping non-basic product: {p.label.identification_area.lidvid}')
+
+
+def do_copy_readme(products: Iterable[pds4.BundleProduct], old_base, new_base, superseded=False) -> None:
+    for p in products:
+        if p.readme_path:
+            vid = p.label.identification_area.lidvid.vid
+            versioned_path = paths.generate_product_path(d, superseded=superseded, vid=vid)
+            new_path = paths.relocate_path(versioned_path, old_base, new_base)
+            copy_to_path(p.readme_path, new_path)
 
 
 def copy_to_path(src_path: str, dest_path: str):
