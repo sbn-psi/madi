@@ -22,7 +22,10 @@ def fetchcollection(path: str) -> CollectionProduct:
 
 def fetchbundle(path: str) -> BundleProduct:
     bundle_label = fetchlabel(path)
-    return BundleProduct(bundle_label, label_path=path)
+    dirname = os.path.dirname(path)
+    readme_path = os.path.join(dirname, bundle_label.file_area.file_name) if bundle_label.file_area else None
+
+    return BundleProduct(bundle_label, label_path=path, readme_path=readme_path)
 
 
 def fetchproduct(path: str) -> BasicProduct:
