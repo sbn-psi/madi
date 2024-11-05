@@ -79,8 +79,8 @@ def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> N
 
     copy_previously_superseded_products(
         previous_fullbundle.superseded_products,
-        previous_fullbundle.collections,
-        previous_fullbundle.bundles,
+        previous_fullbundle.superseded_collections,
+        previous_fullbundle.superseded_bundles,
         previous_bundle_directory,
         merged_bundle_directory)
 
