@@ -7,6 +7,8 @@ from typing import List, Iterable, Tuple
 import paths
 import pds4
 
+import re
+
 logger = logging.getLogger(__name__)
 
 
@@ -67,12 +69,12 @@ def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> N
     logger.warning(f"TODO: Copy bundle readme if present")
 
     do_copy_inventory(previous_collections_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
-    collection_lidvids = ','.join(str(x.label.identification_area.lidvid) for x in previous_collections_to_supersede)
 
     copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, new_bundle_directory)
     generate_collections(previous_collections_to_supersede,
                          new_fullbundle.collections,
                          previous_bundle_directory,
+                         new_bundle_directory,
                          merged_bundle_directory)
 
     copy_previously_superseded_products(
@@ -86,8 +88,11 @@ def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> N
 def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product],
                          new_collections: List[pds4.CollectionProduct],
                          previous_bundle_directory,
+                         new_bundle_directory,
                          merged_bundle_directory) -> None:
+    logger.info(f"Merging collection inventories")
     for previous in previous_collections_to_supersede:
+        logger.info(f"Merging collection inventory: {previous.label.identification_area.lidvid}")
         if isinstance(previous, pds4.CollectionProduct):
             collection_id = previous.label.identification_area.lidvid.lid.collection
             new_collection = [x for x in new_collections
@@ -96,13 +101,25 @@ def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Produc
             inventory.ingest_new_inventory(previous.inventory)
             inventory.ingest_new_inventory(new_collection.inventory)
 
+            previous_count = len(previous.inventory.products())
+            delta_count = len(new_collection.inventory.products())
+            product_count = len(inventory.products())
+
+            logger.info(f"Merged collection has {product_count} products after adding {delta_count} to {previous_count}")
+
             inventory_path = paths.relocate_path(previous.inventory_path,
                                                  previous_bundle_directory,
                                                  merged_bundle_directory)
 
-            logger.warning(f"TODO: Update labels for {previous.label.identification_area.lidvid}")
+            logger.info(f"Writing new inventory to {inventory_path}")
             with open(inventory_path, 'w') as f:
                 f.write(inventory.to_csv())
+
+            inventory_label_contents = open(new_collection.label_path).read()
+            new_inventory_label_contents = re.sub(r"<records>\d*</records>", f"<records>{product_count}</records>", inventory_label_contents)
+            new_path = paths.relocate_path(new_collection.label_path, new_bundle_directory, merged_bundle_directory)
+            logger.info(f"Writing new inventory label to f{new_path}")
+            open(new_path, "w").write(new_inventory_label_contents)
 
 
 def report_superseded(products_to_keep: List[pds4.Pds4Product],
