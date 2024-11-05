@@ -68,7 +68,6 @@ def supersede(previous_fullbundle, new_fullbundle, merged_bundle_directory) -> N
 
     do_copy_inventory(previous_collections_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
     collection_lidvids = ','.join(str(x.label.identification_area.lidvid) for x in previous_collections_to_supersede)
-    logger.warning(f"TODO: Update labels for {collection_lidvids}")
 
     copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, new_bundle_directory)
     generate_collections(previous_collections_to_supersede,
@@ -100,6 +99,8 @@ def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Produc
             inventory_path = paths.relocate_path(previous.inventory_path,
                                                  previous_bundle_directory,
                                                  merged_bundle_directory)
+
+            logger.warning(f"TODO: Update labels for {previous.label.identification_area.lidvid}")
             with open(inventory_path, 'w') as f:
                 f.write(inventory.to_csv())
 
