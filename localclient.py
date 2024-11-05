@@ -22,7 +22,7 @@ def fetchcollection(path: str) -> CollectionProduct:
 
 def fetchbundle(path: str) -> BundleProduct:
     bundle_label = fetchlabel(path)
-    return BundleProduct(bundle_label, path=path)
+    return BundleProduct(bundle_label, label_path=path)
 
 
 def fetchproduct(path: str) -> BasicProduct:

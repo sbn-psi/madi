@@ -95,8 +95,15 @@ class CollectionInventory:
 
 
 class BundleProduct(Pds4Product):
-    def __init__(self, bundle_label: labeltypes.ProductLabel, url: str = None, path: str = None):
-        super().__init__(bundle_label, url, path)
+    def __init__(self, bundle_label: labeltypes.ProductLabel,
+                 label_url: str = None,
+                 label_path: str = None,
+                 readme_url: str = None,
+                 readme_path: str = None):
+        super().__init__(bundle_label, label_url, label_path)
+        self.readme_url = readme_url
+        self.readme_path = readme_path
+
 
 @dataclass
 class FullBundle:
