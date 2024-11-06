@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Iterable
 import itertools
 import csv
 
@@ -37,36 +37,26 @@ class CollectionProduct(Pds4Product):
         self.inventory_path = inventory_path
 
 
+@dataclass
+class InventoryItem:
+    lidvid: LidVid
+    status: str
+
+
 class CollectionInventory:
-    def __init__(self, primary: set[LidVid] = None, secondary: set[LidVid] = None):
-        self.primary = dict((x.lid, x) for x in primary) if primary is not None else {}
-        self.secondary = dict((x.lid, x) for x in secondary) if primary is not None else {}
+    def __init__(self, items: Iterable[InventoryItem] = ()):
+        self.items = dict((x.lidvid.lid, x) for x in items) if items else {}
 
-        if any(x in self.primary.keys() for x in self.secondary.keys()):
-            raise Exception("Some products exist in both primary and secondary collections")
-
-    def add_primary(self, lidvid: LidVid) -> None:
-        lid = lidvid.lid
-        if lid in self.secondary:
-            raise Exception("Product already exists as a secondary member and can't be made primary")
-        if lid in self.primary:
-            previous = self.primary[lid]
-            if previous.vid >= lidvid.vid:
+    def add_item(self, item: InventoryItem):
+        lid = item.lidvid.lid
+        if lid in self.items:
+            previous = self.items[lid]
+            if previous.lidvid.vid >= item.lidvid.vid:
                 raise Exception("Product is not newer than the version that already exists in the inventory")
-        self.primary[lid] = lidvid
-
-    def add_secondary(self, lidvid: LidVid) -> None:
-        lid = lidvid.lid
-        if lid in self.primary:
-            raise Exception("Product already exists as a primary member and can't be made secondary")
-        if lid in self.secondary:
-            previous = self.secondary[lid]
-            if previous.vid >= lidvid.vid:
-                raise Exception("Product is not newer than the version that already exists in the inventory")
-        self.secondary[lid] = lidvid
+        self.items[lid] = item
 
     def products(self) -> set[LidVid]:
-        return set(itertools.chain(self.primary.values(), self.secondary.values()))
+        return set(x.lidvid for x in self.items.values())
 
     @staticmethod
     def from_csv(csvdata) -> "CollectionInventory":
@@ -75,22 +65,16 @@ class CollectionInventory:
         for line in reader:
             status = line["status"]
             lidvid = LidVid.parse(line["lidvid"])
-            if status == "P":
-                inventory.add_primary(lidvid)
-            else:
-                inventory.add_secondary(lidvid)
+            inventory.add_item(InventoryItem(lidvid, status))
         return inventory
 
     def ingest_new_inventory(self, new_inventory: "CollectionInventory") -> None:
-        for lidvid in new_inventory.primary.values():
-            self.add_primary(lidvid)
-        for lidvid in new_inventory.secondary.values():
-            self.add_secondary(lidvid)
+        for item in new_inventory.items.values():
+            self.add_item(item)
 
     def to_csv(self) -> str:
         return "\r\n".join(itertools.chain(
-            sorted((f'P,{x}' for x in self.primary.values())),
-            sorted((f'S,{x}' for x in self.secondary.values()))
+            sorted((f'{x.status},{x.lidvid}' for x in self.items.values()))
         ))
 
 
