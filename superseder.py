@@ -17,7 +17,7 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
     delta_bundle_directory = delta_fullbundle.path
 
     logger.info(f"TODO: Supersede {previous_bundle_directory} "
-                f"with new data from {delta_bundle_directory} into {merged_bundle_directory}")
+                f"with delta data from {delta_bundle_directory} into {merged_bundle_directory}")
 
     previous_bundles_to_keep, previous_bundles_to_supersede = find_superseded(previous_fullbundle.bundles,
                                                                               delta_fullbundle.bundles)
@@ -114,7 +114,7 @@ def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Produc
                                                  previous_bundle_directory,
                                                  merged_bundle_directory)
 
-            logger.info(f"Writing new inventory to {inventory_path}")
+            logger.info(f"Writing merged inventory to {inventory_path}")
             with open(inventory_path, 'w') as f:
                 f.write(inventory.to_csv())
 
