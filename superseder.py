@@ -74,7 +74,7 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
     do_copy_readme(previous_fullbundle.bundles, previous_bundle_directory, merged_bundle_directory, superseded=True)
     do_copy_readme(delta_fullbundle.bundles, delta_bundle_directory, merged_bundle_directory)
 
-    do_copy_inventory(previous_collections_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True)
+    do_copy_inventory(previous_collections_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True, dry=dry)
 
     copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, delta_bundle_directory, dry)
     generate_collections(previous_collections_to_supersede,
