@@ -19,8 +19,8 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
     logger.info(f"TODO: Supersede {previous_bundle_directory} "
                 f"with delta data from {delta_bundle_directory} into {merged_bundle_directory}")
 
-    previous_bundles_to_keep, previous_bundles_to_supersede = find_superseded(previous_fullbundle.bundles,
-                                                                              delta_fullbundle.bundles)
+    previous_bundles_to_keep, previous_bundles_to_supersede = find_products_to_supersede(previous_fullbundle.bundles,
+                                                                                         delta_fullbundle.bundles)
     report_superseded(previous_bundles_to_keep,
                       previous_bundles_to_supersede,
                       delta_fullbundle.bundles,
@@ -29,8 +29,8 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
                       merged_bundle_directory,
                       "Bundles")
 
-    previous_collections_to_keep, previous_collections_to_supersede = find_superseded(previous_fullbundle.collections,
-                                                                                      delta_fullbundle.collections)
+    previous_collections_to_keep, previous_collections_to_supersede = find_products_to_supersede(previous_fullbundle.collections,
+                                                                                                 delta_fullbundle.collections)
     report_superseded(previous_collections_to_keep,
                       previous_collections_to_supersede,
                       delta_fullbundle.collections,
@@ -39,8 +39,8 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
                       merged_bundle_directory,
                       "Collections")
 
-    previous_products_to_keep, previous_products_to_supersede = find_superseded(previous_fullbundle.products,
-                                                                                delta_fullbundle.products)
+    previous_products_to_keep, previous_products_to_supersede = find_products_to_supersede(previous_fullbundle.products,
+                                                                                           delta_fullbundle.products)
     report_superseded(previous_products_to_keep,
                       previous_products_to_supersede,
                       delta_fullbundle.products,
@@ -225,8 +225,8 @@ def copy_to_path(src_path: str, dest_path: str):
     shutil.copy(src_path, dest_path)
 
 
-def find_superseded(previous_products: List[pds4.Pds4Product],
-                    delta_products: List[pds4.Pds4Product]) -> Tuple[List[pds4.Pds4Product], List[pds4.Pds4Product]]:
+def find_products_to_supersede(previous_products: List[pds4.Pds4Product],
+                               delta_products: List[pds4.Pds4Product]) -> Tuple[List[pds4.Pds4Product], List[pds4.Pds4Product]]:
     delta_product_lids = set(x.label.identification_area.lidvid.lid for x in delta_products)
     previous_products_to_keep = [x for x in previous_products if
                                  x.label.identification_area.lidvid.lid not in delta_product_lids]
