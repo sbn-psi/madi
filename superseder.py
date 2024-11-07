@@ -213,7 +213,7 @@ def do_copy_readme(products: Iterable[pds4.BundleProduct], old_base, new_base, s
     for p in products:
         if p.readme_path:
             vid = p.label.identification_area.lidvid.vid
-            versioned_path = paths.generate_product_path(d, superseded=superseded, vid=vid)
+            versioned_path = paths.generate_product_path(p.readme_path, superseded=superseded, vid=vid)
             new_path = paths.relocate_path(versioned_path, old_base, new_base)
             copy_to_path(p.readme_path, new_path)
 

@@ -75,20 +75,19 @@ def _check_collection_increment(previous_collection: pds4.CollectionProduct,
     """
     logger.info(f'Checking version increment for collection inventory members: {delta_collection.label.identification_area.lidvid}')
     errors = []
-    errors.extend(_check_dict_increment(previous_collection.inventory.primary, delta_collection.inventory.primary))
-    errors.extend(_check_dict_increment(previous_collection.inventory.secondary, delta_collection.inventory.secondary))
+    errors.extend(_check_dict_increment(previous_collection.inventory.items, delta_collection.inventory.items))
     return errors
 
 
-def _check_dict_increment(previous_lidvids: Dict[Lid, LidVid], delta_lidvids: Dict[Lid, LidVid]) -> List[ValidationError]:
+def _check_dict_increment(previous_lidvids: Dict[Lid, pds4.InventoryItem], delta_lidvids: Dict[Lid, pds4.InventoryItem]) -> List[ValidationError]:
     """
     Ensure that the supplied new LIDVIDs have been correctly incremented from the previous LIDVIDs
     """
     errors = []
     for lid in delta_lidvids.keys():
         if lid in previous_lidvids.keys():
-            lidvid: LidVid = delta_lidvids[lid]
-            previous_lidvid: LidVid = previous_lidvids[lid]
+            lidvid: LidVid = delta_lidvids[lid].lidvid
+            previous_lidvid: LidVid = previous_lidvids[lid].lidvid
             errors.extend(_check_lidvid_increment(previous_lidvid, lidvid, same=False))
     return errors
 
