@@ -20,6 +20,7 @@ def main() -> None:
     parser.add_argument("-s", "--supersede", type=str)
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-l", "--logfile", type=str)
+    parser.add_argument("-D", "--dry", action="store_true")
 
     args = parser.parse_args()
 
@@ -38,7 +39,7 @@ def main() -> None:
     check_ready(previous_fullbundle, delta_fullbundle)
 
     if args.supersede:
-        supersede(previous_fullbundle, delta_fullbundle, args.supersede)
+        supersede(previous_fullbundle, delta_fullbundle, args.supersede, args.dry)
 
 
 if __name__ == "__main__":
