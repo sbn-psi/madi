@@ -93,43 +93,51 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
 
 def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product],
                          delta_collections: List[pds4.CollectionProduct],
-                         previous_bundle_directory,
-                         delta_bundle_directory,
-                         merged_bundle_directory) -> None:
+                         previous_bundle_directory: str,
+                         delta_bundle_directory: str,
+                         merged_bundle_directory: str) -> None:
     """
-    Merges the inventories from the previous and delta collections and updates the label file with the new
-    record count.
+    Matches up previous and delta collections and merges their inventories.
     """
     logger.info(f"Merging collection inventories")
-    for previous in previous_collections_to_supersede:
-        logger.info(f"Merging collection inventory: {previous.label.identification_area.lidvid}")
-        if isinstance(previous, pds4.CollectionProduct):
-            collection_id = previous.label.identification_area.lidvid.lid.collection
+    for previous_collection in previous_collections_to_supersede:
+        logger.info(f"Merging collection inventory: {previous_collection.label.identification_area.lidvid}")
+        if isinstance(previous_collection, pds4.CollectionProduct):
+            previous_collection_lid = previous_collection.label.identification_area.lidvid.lid
             delta_collection = [x for x in delta_collections
-                              if x.label.identification_area.lidvid.lid.collection == collection_id][0]
-            inventory = pds4.CollectionInventory()
-            inventory.ingest_new_inventory(previous.inventory)
-            inventory.ingest_new_inventory(delta_collection.inventory)
+                                if x.label.identification_area.lidvid.lid == previous_collection_lid][0]
+            generate_collection(previous_collection, delta_collection, previous_bundle_directory, delta_bundle_directory,
+                                merged_bundle_directory)
 
-            previous_count = len(previous.inventory.products())
-            delta_count = len(delta_collection.inventory.products())
-            product_count = len(inventory.products())
 
-            logger.info(f"Merged collection has {product_count} products after adding {delta_count} to {previous_count}")
-
-            inventory_path = paths.relocate_path(previous.inventory_path,
-                                                 previous_bundle_directory,
-                                                 merged_bundle_directory)
-
-            logger.info(f"Writing merged inventory to {inventory_path}")
-            with open(inventory_path, 'w') as f:
-                f.write(inventory.to_csv())
-
-            inventory_label_contents = open(delta_collection.label_path).read()
-            new_inventory_label_contents = re.sub(r"<records>\d*</records>", f"<records>{product_count}</records>", inventory_label_contents)
-            new_path = paths.relocate_path(delta_collection.label_path, delta_bundle_directory, merged_bundle_directory)
-            logger.info(f"Writing new inventory label to f{new_path}")
-            open(new_path, "w").write(new_inventory_label_contents)
+def generate_collection(previous_collection: pds4.CollectionProduct,
+                        delta_collection: pds4.CollectionProduct,
+                        previous_bundle_directory: str,
+                        delta_bundle_directory: str,
+                        merged_bundle_directory: str) -> None:
+    """
+    Merges the inventories from the previous and delta collection and updates the label file with the new
+    record count.
+    """
+    inventory = pds4.CollectionInventory()
+    inventory.ingest_new_inventory(previous_collection.inventory)
+    inventory.ingest_new_inventory(delta_collection.inventory)
+    previous_count = len(previous_collection.inventory.products())
+    delta_count = len(delta_collection.inventory.products())
+    product_count = len(inventory.products())
+    logger.info(f"Merged collection has {product_count} products after adding {delta_count} to {previous_count}")
+    inventory_path = paths.relocate_path(previous_collection.inventory_path,
+                                         previous_bundle_directory,
+                                         merged_bundle_directory)
+    logger.info(f"Writing merged inventory to {inventory_path}")
+    with open(inventory_path, 'w') as f:
+        f.write(inventory.to_csv())
+    inventory_label_contents = open(delta_collection.label_path).read()
+    new_inventory_label_contents = re.sub(r"<records>\d*</records>", f"<records>{product_count}</records>",
+                                          inventory_label_contents)
+    new_path = paths.relocate_path(delta_collection.label_path, delta_bundle_directory, merged_bundle_directory)
+    logger.info(f"Writing new inventory label to f{new_path}")
+    open(new_path, "w").write(new_inventory_label_contents)
 
 
 def report_superseded(products_to_keep: List[pds4.Pds4Product],
