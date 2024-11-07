@@ -100,17 +100,17 @@ def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Produc
     Matches up previous and delta collections and merges their inventories.
     """
     logger.info(f"Merging collection inventories")
-    for previous in previous_collections_to_supersede:
-        logger.info(f"Merging collection inventory: {previous.label.identification_area.lidvid}")
-        if isinstance(previous, pds4.CollectionProduct):
-            previous_collection_lid = previous.label.identification_area.lidvid.lid
+    for previous_collection in previous_collections_to_supersede:
+        logger.info(f"Merging collection inventory: {previous_collection.label.identification_area.lidvid}")
+        if isinstance(previous_collection, pds4.CollectionProduct):
+            previous_collection_lid = previous_collection.label.identification_area.lidvid.lid
             delta_collection = [x for x in delta_collections
                                 if x.label.identification_area.lidvid.lid == previous_collection_lid][0]
-            generate_collection(previous, delta_collection, previous_bundle_directory, delta_bundle_directory,
+            generate_collection(previous_collection, delta_collection, previous_bundle_directory, delta_bundle_directory,
                                 merged_bundle_directory)
 
 
-def generate_collection(previous: pds4.CollectionProduct,
+def generate_collection(previous_collection: pds4.CollectionProduct,
                         delta_collection: pds4.CollectionProduct,
                         previous_bundle_directory: str,
                         delta_bundle_directory: str,
@@ -120,13 +120,13 @@ def generate_collection(previous: pds4.CollectionProduct,
     record count.
     """
     inventory = pds4.CollectionInventory()
-    inventory.ingest_new_inventory(previous.inventory)
+    inventory.ingest_new_inventory(previous_collection.inventory)
     inventory.ingest_new_inventory(delta_collection.inventory)
-    previous_count = len(previous.inventory.products())
+    previous_count = len(previous_collection.inventory.products())
     delta_count = len(delta_collection.inventory.products())
     product_count = len(inventory.products())
     logger.info(f"Merged collection has {product_count} products after adding {delta_count} to {previous_count}")
-    inventory_path = paths.relocate_path(previous.inventory_path,
+    inventory_path = paths.relocate_path(previous_collection.inventory_path,
                                          previous_bundle_directory,
                                          merged_bundle_directory)
     logger.info(f"Writing merged inventory to {inventory_path}")
