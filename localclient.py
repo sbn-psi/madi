@@ -13,6 +13,7 @@ from pds4 import CollectionProduct, BundleProduct, BasicProduct, CollectionInven
 
 
 def fetchcollection(path: str) -> CollectionProduct:
+    """Retrieves a collection product located at the specified path"""
     collection_label = fetchlabel(path)
     inventory_path = os.path.join(os.path.dirname(path), collection_label.file_area.file_name)
     with open(inventory_path, newline="") as f:
@@ -21,6 +22,7 @@ def fetchcollection(path: str) -> CollectionProduct:
 
 
 def fetchbundle(path: str) -> BundleProduct:
+    """Retrieves a bundle product located at the specified path"""
     bundle_label = fetchlabel(path)
     dirname = os.path.dirname(path)
     readme_path = os.path.join(dirname, bundle_label.file_area.file_name) if bundle_label.file_area else None
@@ -29,6 +31,7 @@ def fetchbundle(path: str) -> BundleProduct:
 
 
 def fetchproduct(path: str) -> BasicProduct:
+    """Retrieves a basic product located at the specified path"""
     product_label = fetchlabel(path)
     dirname = os.path.dirname(path)
     data_paths = paths.rebase_filenames(dirname, [product_label.file_area.file_name]) if product_label.file_area else []
@@ -38,6 +41,7 @@ def fetchproduct(path: str) -> BasicProduct:
 
 
 def fetchlabel(path: str) -> ProductLabel:
+    """Retrieves a product label located at the specified path"""
     with open(path) as f:
         text = f.read()
         checksum = hashlib.md5(text.encode('utf-8')).hexdigest()
@@ -46,6 +50,7 @@ def fetchlabel(path: str) -> ProductLabel:
 
 
 def get_file_paths(path: str) -> Iterable[str]:
+    """Retrieves every file path located below a directory."""
     return itertools.chain.from_iterable(
         (os.path.join(dirpath, filename) for filename in filenames)
         for dirpath, _, filenames in os.walk(path))
