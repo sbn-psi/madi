@@ -93,9 +93,9 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
 
 def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product],
                          delta_collections: List[pds4.CollectionProduct],
-                         previous_bundle_directory,
-                         delta_bundle_directory,
-                         merged_bundle_directory) -> None:
+                         previous_bundle_directory: str,
+                         delta_bundle_directory: str,
+                         merged_bundle_directory: str) -> None:
     """
     Merges the inventories from the previous and delta collections and updates the label file with the new
     record count.
