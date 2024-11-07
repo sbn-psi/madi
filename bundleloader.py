@@ -4,7 +4,11 @@ import pds4
 
 logger = logging.getLogger(__name__)
 
+
 def load_local_bundle(path: str) -> pds4.FullBundle:
+    """
+    Loads a bundle located at the given path on the filesystsm
+    """
     logger.info(f'Loading bundle: {path}')
     filepaths = localclient.get_file_paths(path)
     label_paths = [x for x in filepaths if x.endswith(".xml")]
@@ -27,17 +31,37 @@ def load_local_bundle(path: str) -> pds4.FullBundle:
     return pds4.FullBundle(path, bundles, superseded_bundles, collections, superseded_collections, products, superseded_products)
 
 
-def is_basic(x: str) -> bool:
-    return not (is_collection(x) or is_bundle(x))
+def is_basic(filepath: str) -> bool:
+    """
+    Determines if the product at the given path is a basic (non-collection or bundle) product.
+    :param filepath:
+    :return:
+    """
+    return not (is_collection(filepath) or is_bundle(filepath))
 
 
-def is_collection(x: str) -> bool:
-    return "collection" in x
+def is_collection(filepath: str) -> bool:
+    """
+    Determines if the product at the given path is a collection product
+    :param filepath:
+    :return:
+    """
+    return "collection" in filepath
 
 
-def is_bundle(x: str) -> bool:
-    return "bundle" in x
+def is_bundle(filepath: str) -> bool:
+    """
+    Determines if the product at the given path is a bundle product
+    :param filepath:
+    :return:
+    """
+    return "bundle" in filepath
 
 
-def is_superseded(x: str) -> bool:
-    return "SUPERSEDED" in x
+def is_superseded(filepath: str) -> bool:
+    """
+    Determines if the product at the given path has been superseded
+    :param filepath:
+    :return:
+    """
+    return "SUPERSEDED" in filepath

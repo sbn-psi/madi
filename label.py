@@ -271,4 +271,5 @@ T = TypeVar("T")
 
 
 def _extract(elem: bs4.Tag, func: Callable[[bs4.Tag], T], default=None) -> T:
+    """Runs the provided function on the specified Tag, or returns the default if the tag does not exist"""
     return func(elem) if elem else default
