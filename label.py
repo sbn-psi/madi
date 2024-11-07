@@ -34,7 +34,7 @@ def extract_bundle(bundle: bs4.Tag, checksum: str) -> ProductLabel:
         identification_area=_extract_identification_area(bundle.Identification_Area),
         context_area=_extract_context_area(bundle.Context_Area),
         bundle_member_entries=[_extract_bundle_member_entry(x) for x in bundle.find_all("Bundle_Member_Entry")],
-        file_area=_extract_file_area(bundle.File_Area_Text)
+        file_area=_extract_file_area(bundle.File_Area_Text) if bundle.File_Area_Text else None
     )
 
 
