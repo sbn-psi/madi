@@ -56,15 +56,15 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
                                   previous_collections_to_keep,
                                   previous_products_to_keep,),
                   previous_bundle_directory,
-                  merged_bundle_directory)
+                  merged_bundle_directory, dry)
     do_copy_label(itertools.chain(previous_bundles_to_supersede,
                                   previous_collections_to_supersede,
                                   previous_products_to_supersede),
                   previous_bundle_directory,
-                  merged_bundle_directory, superseded=True)
+                  merged_bundle_directory, dry, superseded=True)
     do_copy_label(itertools.chain(delta_fullbundle.collections,
                                   delta_fullbundle.bundles,
-                                  delta_fullbundle.products), delta_bundle_directory, merged_bundle_directory)
+                                  delta_fullbundle.products), delta_bundle_directory, merged_bundle_directory, dry)
 
     do_copy_data(previous_products_to_keep, previous_bundle_directory, merged_bundle_directory, dry)
     do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, dry, superseded=True)
@@ -182,7 +182,7 @@ def report_new_paths(products: List[pds4.Pds4Product], old_base, new_base, super
         logger.info(f"{p.label.identification_area.lidvid} will be moved to {new_path}")
 
 
-def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
+def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, dry: bool, superseded=False) -> None:
     """
     Copies a label to a new directory. This will update the path to move it to the superseded directory if necessary.
     """
@@ -190,9 +190,7 @@ def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, supe
         vid = p.label.identification_area.lidvid.vid
         versioned_path = paths.generate_product_path(p.label_path, superseded=superseded, vid=vid)
         new_path = paths.relocate_path(versioned_path, old_base, new_base)
-        dirname = os.path.dirname(new_path)
-        os.makedirs(dirname, exist_ok=True)
-        shutil.copy(p.label_path, new_path)
+        copy_to_path(p.label_path, new_path, dry)
 
 
 def copy_previously_superseded_products(
