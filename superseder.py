@@ -103,9 +103,9 @@ def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Produc
     for previous in previous_collections_to_supersede:
         logger.info(f"Merging collection inventory: {previous.label.identification_area.lidvid}")
         if isinstance(previous, pds4.CollectionProduct):
-            collection_id = previous.label.identification_area.lidvid.lid.collection
+            previous_collection_lid = previous.label.identification_area.lidvid.lid
             delta_collection = [x for x in delta_collections
-                              if x.label.identification_area.lidvid.lid.collection == collection_id][0]
+                                if x.label.identification_area.lidvid.lid == previous_collection_lid][0]
             generate_collection(previous, delta_collection, previous_bundle_directory, delta_bundle_directory,
                                 merged_bundle_directory)
 
