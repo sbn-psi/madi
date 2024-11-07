@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullBundle, merged_bundle_directory) -> None:
+    """
+    Merges the bundles together and supersedes any products that have a newer version.
+    """
     previous_bundle_directory = previous_fullbundle.path
     delta_bundle_directory = delta_fullbundle.path
 
@@ -93,6 +96,10 @@ def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Produc
                          previous_bundle_directory,
                          delta_bundle_directory,
                          merged_bundle_directory) -> None:
+    """
+    Merges the inventories from the previous and delta collections and updates the label file with the new
+    record count.
+    """
     logger.info(f"Merging collection inventories")
     for previous in previous_collections_to_supersede:
         logger.info(f"Merging collection inventory: {previous.label.identification_area.lidvid}")
@@ -132,6 +139,9 @@ def report_superseded(products_to_keep: List[pds4.Pds4Product],
                       delta_bundle_dir,
                       merged_bundle_dir,
                       label: str = "Products") -> None:
+    """
+    Logs which products will be superseded by MADI
+    """
     logger.info(f"{label} to supersede: {[str(x.label.identification_area.lidvid) for x in products_to_supersede]}")
     report_new_paths(products_to_supersede, previous_bundle_dir, merged_bundle_dir, True)
     logger.info(f"{label} to keep: {[str(x.label.identification_area.lidvid) for x in products_to_keep]}")
@@ -141,6 +151,9 @@ def report_superseded(products_to_keep: List[pds4.Pds4Product],
 
 
 def report_new_paths(products: List[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
+    """
+    Logs the new paths for the given products
+    """
     for p in products:
         vid = p.label.identification_area.lidvid.vid
         versioned_path = paths.generate_product_path(p.label_path, superseded=superseded, vid=vid)
@@ -149,6 +162,9 @@ def report_new_paths(products: List[pds4.Pds4Product], old_base, new_base, super
 
 
 def do_copy_label(products: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
+    """
+    Copies a label to a new directory. This will update the path to move it to the superseded directory if necessary.
+    """
     for p in products:
         vid = p.label.identification_area.lidvid.vid
         versioned_path = paths.generate_product_path(p.label_path, superseded=superseded, vid=vid)
@@ -164,6 +180,10 @@ def copy_previously_superseded_products(
         bundles: Iterable[pds4.BundleProduct],
         old_base: str,
         new_base: str):
+    """
+    Copies products that have already been superseded to a new directory. Since these have already been superseded,
+    no manipulations to their path should be necessary.
+    """
     for bundle in bundles:
         copy_to_path(bundle.label_path, paths.relocate_path(bundle.label_path, old_base, new_base))
     for collection in collections:
@@ -177,6 +197,9 @@ def copy_previously_superseded_products(
 
 
 def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_base: str, new_base: str) -> None:
+    """
+    Copies collection labels and inventories that should be passed through as-is to a new directory
+    """
     for c in collections:
         if isinstance(c, pds4.CollectionProduct):
             new_path = paths.relocate_path(paths.generate_product_path(c.inventory_path), old_base, new_base)
@@ -186,6 +209,9 @@ def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_bas
 
 
 def do_copy_inventory(collections: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
+    """
+    Copies the collection inventories of a collection product to a new directory
+    """
     for c in collections:
         if isinstance(c, pds4.CollectionProduct):
             d = c.inventory_path
@@ -198,6 +224,9 @@ def do_copy_inventory(collections: Iterable[pds4.Pds4Product], old_base, new_bas
 
 
 def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, superseded=False) -> None:
+    """
+    Copies the data files of a basic product to another directory
+    """
     for p in products:
         if isinstance(p, pds4.BasicProduct):
             for d in p.data_paths:
@@ -210,6 +239,9 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, super
 
 
 def do_copy_readme(products: Iterable[pds4.BundleProduct], old_base, new_base, superseded=False) -> None:
+    """
+    Copies the readme file of a bundle product to another directory
+    """
     for p in products:
         if p.readme_path:
             vid = p.label.identification_area.lidvid.vid
@@ -219,6 +251,10 @@ def do_copy_readme(products: Iterable[pds4.BundleProduct], old_base, new_base, s
 
 
 def copy_to_path(src_path: str, dest_path: str):
+    """
+    Copies files from one path to another. Essentially a wrapper for shutil.copy that logs the copy operation
+    and makes sure that all of the parent directories exist.
+    """
     logger.debug(f'{src_path} -> {dest_path}')
     dirname = os.path.dirname(dest_path)
     os.makedirs(dirname, exist_ok=True)
@@ -227,6 +263,13 @@ def copy_to_path(src_path: str, dest_path: str):
 
 def find_products_to_supersede(previous_products: List[pds4.Pds4Product],
                                delta_products: List[pds4.Pds4Product]) -> Tuple[List[pds4.Pds4Product], List[pds4.Pds4Product]]:
+    """
+    Compares products in the delta bundle to the existing products, and determines which of the existing products should
+    be superseded.
+    :param previous_products: A list of products that were in the existing bundle.
+    :param delta_products: A list of products that are present in the existing bundle
+    :return: A tuple consisting of a list of products to keep as-is and a list of products that should be superseded.
+    """
     delta_product_lids = set(x.label.identification_area.lidvid.lid for x in delta_products)
     previous_products_to_keep = [x for x in previous_products if
                                  x.label.identification_area.lidvid.lid not in delta_product_lids]
