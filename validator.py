@@ -27,7 +27,7 @@ def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bun
     """
     logger.info(f"Checking delta bundle label {delta_bundle.lidvid()} against previous bundle label {previous_bundle.lidvid()}")
     errors = []
-    errors.extend(_check_modification_history(delta_bundle, previous_bundle))
+    errors.extend(_check_modification_history(previous_bundle, delta_bundle))
     errors.extend(_check_bundle_increment(previous_bundle.label, delta_bundle.label))
     return errors
 
@@ -51,14 +51,14 @@ def check_collection_against_previous(previous_collection: pds4.CollectionProduc
     """
     logger.info(f"Checking delta product label {delta_collection.lidvid()} against previous product {previous_collection.lidvid()}")
     errors = []
-    errors.extend(_check_modification_history(delta_collection, previous_collection))
+    errors.extend(_check_modification_history(previous_collection, delta_collection))
 
     errors.extend(_check_collection_increment(previous_collection, delta_collection))
     errors.extend(_check_collection_duplicates(previous_collection, delta_collection))
     return errors
 
 
-def _check_modification_history(delta_collection: pds4.Pds4Product, previous_collection: pds4.Pds4Product):
+def _check_modification_history(previous_collection: pds4.Pds4Product, delta_collection: pds4.Pds4Product):
     logger.info(f"Checking delta collection label {delta_collection.lidvid()} against previous collection {previous_collection.lidvid()}")
     errors = []
     errors.extend(_check_for_modification_history(previous_collection.label))
@@ -199,7 +199,7 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
     if len(delta_details) >= len(previous_details):
         pairs = zip(previous_details, delta_details[:len(previous_details)])
         for pair in pairs:
-            errors.extend(_compare_modifcation_detail(pair, delta_lidvid, prev_lidvid))
+            errors.extend(_compare_modifcation_detail(pair, prev_lidvid, delta_lidvid))
     else:
         errors.append(ValidationError(f"{delta_lidvid} must contain at least as many modification details as {prev_lidvid}"))
 
@@ -214,7 +214,8 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
     return errors
 
 
-def _compare_modifcation_detail(pair: Tuple[labeltypes.ModificationDetail, labeltypes.ModificationDetail], delta_lidvid: LidVid, prev_lidvid: LidVid) -> List[ValidationError]:
+def _compare_modifcation_detail(pair: Tuple[labeltypes.ModificationDetail, labeltypes.ModificationDetail],
+                                prev_lidvid: LidVid, delta_lidvid: LidVid) -> List[ValidationError]:
     """
     Ensures that two corresponding modification detail entries are the same
     """
