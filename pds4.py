@@ -14,6 +14,9 @@ class Pds4Product:
         self.label_url = label_url
         self.label_path = label_path
 
+    def lidvid(self) -> LidVid:
+        return self.label.identification_area.lidvid
+
 
 class BasicProduct(Pds4Product):
     def __init__(self, product_label: labeltypes.ProductLabel, label_url: str = None,
