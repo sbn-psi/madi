@@ -263,9 +263,12 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
     errors = []
     previous_label_filename = os.path.basename(previous_product.label_path)
     delta_label_filename = os.path.basename(delta_product.label_path)
+
     if previous_label_filename != delta_label_filename:
         errors.append(ValidationError(
             f"New product has inconsistent label filename. Was: {previous_label_filename}, Now: {delta_label_filename}"))
+    else:
+        logger.info(f"Label Filename check for {delta_product.lidvid()}: OK. Filename: {delta_label_filename}")
 
     previous_data_filenames = set(os.path.basename(x) for x in previous_product.data_paths)
     delta_data_filenames = set(os.path.basename(x) for x in delta_product.data_paths)
@@ -273,4 +276,6 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
     if previous_data_filenames != delta_data_filenames:
         errors.append(ValidationError(
             f"New product has inconsistent data filenames. Was: {','.join(previous_data_filenames)}, Now: {','.join(delta_data_filenames)}"))
+    else:
+        logger.info(f"Data filename check for {delta_product.lidvid()}: OK. Filenames: {','.join(delta_data_filenames)}")
     return errors
