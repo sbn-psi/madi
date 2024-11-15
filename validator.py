@@ -246,7 +246,7 @@ def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collec
     return errors
 
 
-def _check_filename_consistency(previous_products: Iterable[pds4.BasicProduct], delta_products: Iterable[pds4.BasicProduct]) -> List[ValidationError]:
+def check_filename_consistency(previous_products: Iterable[pds4.BasicProduct], delta_products: Iterable[pds4.BasicProduct]) -> List[ValidationError]:
     errors = []
     previous_products_by_lid = dict((x.lidvid().lid, x) for x in previous_products)
     superseding_products = (x for x in delta_products if x.lidvid().vid.is_superseding())
