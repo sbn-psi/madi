@@ -25,9 +25,9 @@ def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bun
     Performs bundle level checks, comparing the delta bundle to the previous bundle:
         * Compare the bundle version numbers
     """
-    logger.info(f"Checking delta bundle label {delta_bundle.label.identification_area.lidvid} against previous bundle label {previous_bundle.label.identification_area.lidvid}")
+    logger.info(f"Checking delta bundle label {delta_bundle.lidvid()} against previous bundle label {previous_bundle.lidvid()}")
     errors = []
-    errors.extend(_check_modification_history(delta_bundle, previous_bundle))
+    errors.extend(_check_modification_history(previous_bundle, delta_bundle))
     errors.extend(_check_bundle_increment(previous_bundle.label, delta_bundle.label))
     return errors
 
@@ -36,8 +36,8 @@ def check_bundle_against_collections(bundle: pds4.BundleProduct, collections: It
     """
     Compare the collections declared in the bundle to the collections that actually appear
     """
-    logger.info(f"Checking bundle label {bundle.label.identification_area.lidvid} against existing collections")
-    collection_lidvids = [x.label.identification_area.lidvid for x in collections]
+    logger.info(f"Checking bundle label {bundle.lidvid()} against existing collections")
+    collection_lidvids = [x.lidvid() for x in collections]
     return _check_bundle_for_latest_collections(bundle.label, set(collection_lidvids))
 
 
@@ -49,17 +49,17 @@ def check_collection_against_previous(previous_collection: pds4.CollectionProduc
         * check that any products in the delta collection inventory correctly supersede the products in the old inventory
         * check that products in the delta inventory do not duplicate the old inventory
     """
-    logger.info(f"Checking delta product label {delta_collection.label.identification_area.lidvid} against previous product {previous_collection.label.identification_area.lidvid}")
+    logger.info(f"Checking delta product label {delta_collection.lidvid()} against previous product {previous_collection.lidvid()}")
     errors = []
-    errors.extend(_check_modification_history(delta_collection, previous_collection))
+    errors.extend(_check_modification_history(previous_collection, delta_collection))
 
     errors.extend(_check_collection_increment(previous_collection, delta_collection))
     errors.extend(_check_collection_duplicates(previous_collection, delta_collection))
     return errors
 
 
-def _check_modification_history(delta_collection: pds4.Pds4Product, previous_collection: pds4.Pds4Product):
-    logger.info(f"Checking delta collection label {delta_collection.label.identification_area.lidvid} against previous collection {previous_collection.label.identification_area.lidvid}")
+def _check_modification_history(previous_collection: pds4.Pds4Product, delta_collection: pds4.Pds4Product):
+    logger.info(f"Checking delta collection label {delta_collection.lidvid()} against previous collection {previous_collection.lidvid()}")
     errors = []
     errors.extend(_check_for_modification_history(previous_collection.label))
     errors.extend(_check_for_modification_history(delta_collection.label))
@@ -73,7 +73,7 @@ def _check_collection_increment(previous_collection: pds4.CollectionProduct,
     """
     Ensure that the LIDVIDs for all the products in a collection have been correctly incremented
     """
-    logger.info(f'Checking version increment for collection inventory members: {delta_collection.label.identification_area.lidvid}')
+    logger.info(f'Checking version increment for collection inventory members: {delta_collection.lidvid()}')
     errors = []
     errors.extend(_check_dict_increment(previous_collection.inventory.items, delta_collection.inventory.items))
     return errors
@@ -155,7 +155,7 @@ def _check_collection_duplicates(previous_collection: pds4.CollectionProduct,
     Ensure that the new collection does not have products that match the old collection.
     Every product must be new or must supersede the old product
     """
-    logger.info(f'Checking collection inventory for duplicate products: {delta_collection.label.identification_area.lidvid}')
+    logger.info(f'Checking collection inventory for duplicate products: {delta_collection.lidvid()}')
     errors = []
     duplicates = delta_collection.inventory.products().intersection(previous_collection.inventory.products())
     if duplicates:
@@ -199,7 +199,7 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
     if len(delta_details) >= len(previous_details):
         pairs = zip(previous_details, delta_details[:len(previous_details)])
         for pair in pairs:
-            errors.extend(_compare_modifcation_detail(pair, delta_lidvid, prev_lidvid))
+            errors.extend(_compare_modifcation_detail(pair, prev_lidvid, delta_lidvid))
     else:
         errors.append(ValidationError(f"{delta_lidvid} must contain at least as many modification details as {prev_lidvid}"))
 
@@ -214,7 +214,8 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
     return errors
 
 
-def _compare_modifcation_detail(pair: Tuple[labeltypes.ModificationDetail, labeltypes.ModificationDetail], delta_lidvid: LidVid, prev_lidvid: LidVid) -> List[ValidationError]:
+def _compare_modifcation_detail(pair: Tuple[labeltypes.ModificationDetail, labeltypes.ModificationDetail],
+                                prev_lidvid: LidVid, delta_lidvid: LidVid) -> List[ValidationError]:
     """
     Ensures that two corresponding modification detail entries are the same
     """
