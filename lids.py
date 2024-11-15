@@ -48,6 +48,9 @@ class Vid:
     def inc_minor(self) -> 'Vid':
         return Vid(self.major, self.minor + 1)
 
+    def is_superseding(self) -> bool:
+        return self.major > 1 or self.minor > 0
+
 
 @dataclass(frozen=True)
 class LidVid:
