@@ -1,6 +1,7 @@
 import pds4
 import label
 import labeltypes
+import os.path
 from typing import Dict, Set, Iterable, List, Tuple
 
 from lids import Lid, LidVid
@@ -242,4 +243,39 @@ def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collec
                         f"{','.join(x.__str__() for x in collection_lidvids)}"
                         f"Instead, it had: "
                         f"{','.join(x.__str__() for x in bundle_member_lidvids)}"))
+    return errors
+
+
+def check_filename_consistency(previous_products: Iterable[pds4.BasicProduct], delta_products: Iterable[pds4.BasicProduct]) -> List[ValidationError]:
+    errors = []
+    previous_products_by_lid = dict((x.lidvid().lid, x) for x in previous_products)
+    superseding_products = (x for x in delta_products if x.lidvid().vid.is_superseding())
+    for delta_product in superseding_products:
+        previous_product = previous_products_by_lid[delta_product.lidvid().lid]
+        if previous_product:
+            errors.extend(_do_check_filename_consistency(previous_product, delta_product))
+        else:
+            errors.append(ValidationError(f"Could not check filename consistency for {delta_product.lidvid()}. Previous product not found."))
+    return errors
+
+
+def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_product: pds4.BasicProduct):
+    errors = []
+    previous_label_filename = os.path.basename(previous_product.label_path)
+    delta_label_filename = os.path.basename(delta_product.label_path)
+
+    if previous_label_filename != delta_label_filename:
+        errors.append(ValidationError(
+            f"New product has inconsistent label filename. Was: {previous_label_filename}, Now: {delta_label_filename}"))
+    else:
+        logger.info(f"Label Filename check for {delta_product.lidvid()}: OK. Filename: {delta_label_filename}")
+
+    previous_data_filenames = set(os.path.basename(x) for x in previous_product.data_paths)
+    delta_data_filenames = set(os.path.basename(x) for x in delta_product.data_paths)
+
+    if previous_data_filenames != delta_data_filenames:
+        errors.append(ValidationError(
+            f"New product has inconsistent data filenames. Was: {','.join(previous_data_filenames)}, Now: {','.join(delta_data_filenames)}"))
+    else:
+        logger.info(f"Data filename check for {delta_product.lidvid()}: OK. Filenames: {','.join(delta_data_filenames)}")
     return errors
