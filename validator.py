@@ -251,7 +251,7 @@ def check_filename_consistency(previous_products: Iterable[pds4.BasicProduct], d
     previous_products_by_lid = dict((x.lidvid().lid, x) for x in previous_products)
     superseding_products = (x for x in delta_products if x.lidvid().vid.is_superseding())
     for delta_product in superseding_products:
-        previous_product = previous_products_by_lid[delta_product.lidvid().lid]
+        previous_product = previous_products_by_lid.get(delta_product.lidvid().lid)
         if previous_product:
             errors.extend(_do_check_filename_consistency(previous_product, delta_product))
         else:
