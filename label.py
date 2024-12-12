@@ -73,6 +73,18 @@ def extract_product_context(product_context: bs4.Tag, checksum: str) -> ProductL
         identification_area=_extract(product_context.Identification_Area, _extract_identification_area)
     )
 
+
+def extract_product_schema(product_schema: bs4.Tag, checksum: str) -> ProductLabel:
+    """
+    Extracts keywords from the Product_Schema element
+    """
+    return ProductLabel(
+        checksum=checksum,
+        identification_area=_extract(product_schema.Identification_Area, _extract_identification_area),
+        file_areas=[_extract_file_area(f) for f in product_schema.find_all("File_Area_XML_Schema")]
+    )
+
+
 def extract_product_document(product_document: bs4.Tag, checksum: str) -> ProductLabel:
     """
     Extracts keywords from the Product_Document element
