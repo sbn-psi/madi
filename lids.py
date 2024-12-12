@@ -59,8 +59,12 @@ class LidVid:
 
     @staticmethod
     def parse(lidvidstr: str) -> 'LidVid':
-        lid, vid = lidvidstr.split("::")
-        return LidVid.assemble(lid, vid)
+        if "::" in lidvidstr:
+            lid, vid = lidvidstr.split("::")
+            return LidVid.assemble(lid, vid)
+        else:
+            lid = lidvidstr
+            return LidVid(lid=Lid.parse(lid), vid=Vid(-1, 0))
 
     @staticmethod
     def assemble(lid: str, vid: str) -> 'LidVid':
