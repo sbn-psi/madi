@@ -36,14 +36,18 @@ def do_checkready(previous_fullbundle: pds4.FullBundle,
     errors.extend(validator.check_bundle_against_previous(previous_fullbundle.bundles[0], delta_fullbundle.bundles[0]))
     errors.extend(validator.check_bundle_against_collections(delta_fullbundle.bundles[0], delta_fullbundle.collections))
 
-    for delta_collection in delta_fullbundle.collections:
-        new_collection_lid = delta_collection.label.identification_area.lidvid.lid
-        previous_collections = [x for x in previous_fullbundle.collections if
-                                x.label.identification_area.lidvid.lid == new_collection_lid]
-        if previous_collections:
-            previous_collection = previous_collections[0]
-            errors.extend(validator.check_collection_against_previous(previous_collection, delta_collection))
+    for collection in delta_fullbundle.collections + previous_fullbundle.collections:
+        errors.extend(validator.check_vid_presence(collection.inventory.products()))
 
-    errors.extend(validator.check_filename_consistency(previous_fullbundle.products, delta_fullbundle.products))
+    if not errors:
+        for delta_collection in delta_fullbundle.collections:
+            new_collection_lid = delta_collection.label.identification_area.lidvid.lid
+            previous_collections = [x for x in previous_fullbundle.collections if
+                                    x.label.identification_area.lidvid.lid == new_collection_lid]
+            if previous_collections:
+                previous_collection = previous_collections[0]
+                errors.extend(validator.check_collection_against_previous(previous_collection, delta_collection))
+
+        errors.extend(validator.check_filename_consistency(previous_fullbundle.products, delta_fullbundle.products))
 
     return errors
