@@ -22,6 +22,10 @@ def extract_label(xmldoc: BeautifulSoup, checksum: str, filepath: str = '') -> P
         return label.extract_product_observational(xmldoc.Product_Observational, checksum)
     if xmldoc.Product_Ancillary:
         return label.extract_product_ancillary(xmldoc.Product_Ancillary, checksum)
+    if xmldoc.Product_Context:
+        return label.extract_product_context(xmldoc.Product_Context, checksum)
+    if xmldoc.Product_XML_Schema:
+        return label.extract_product_schema(xmldoc.Product_XML_Schema, checksum)
     if xmldoc.Product_Document:
         return label.extract_product_document(xmldoc.Product_Document, checksum)
     if xmldoc.Product_Collection:
