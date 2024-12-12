@@ -64,6 +64,15 @@ def extract_product_ancillary(product_ancillary: bs4.Tag, checksum: str) -> Prod
     )
 
 
+def extract_product_context(product_context: bs4.Tag, checksum: str) -> ProductLabel:
+    """
+    Extracts keywords from the Product_Context element
+    """
+    return ProductLabel(
+        checksum=checksum,
+        identification_area=_extract(product_context.Identification_Area, _extract_identification_area)
+    )
+
 def extract_product_document(product_document: bs4.Tag, checksum: str) -> ProductLabel:
     """
     Extracts keywords from the Product_Document element
