@@ -124,7 +124,7 @@ class BundleMemberEntry:
 class ProductLabel:
     checksum: str = None
     identification_area: IdentificationArea = None
-    file_area: Optional[FileArea] = None
+    file_areas: List[FileArea] = None
     context_area: Optional[ContextArea] = None
     discipline_area: Optional[DisciplineArea] = None
     document: Optional[Document] = None

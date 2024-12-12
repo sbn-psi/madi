@@ -21,7 +21,7 @@ def extract_collection(collection: bs4.Tag, checksum: str) -> ProductLabel:
         checksum=checksum,
         identification_area=_extract_identification_area(collection.Identification_Area),
         context_area=_extract_context_area(collection.Context_Area),
-        file_area=_extract_file_area(collection.File_Area_Inventory)
+        file_areas=[_extract_file_area(f) for f in collection.find_all("File_Area_Inventory")]
     )
 
 
@@ -34,7 +34,7 @@ def extract_bundle(bundle: bs4.Tag, checksum: str) -> ProductLabel:
         identification_area=_extract_identification_area(bundle.Identification_Area),
         context_area=_extract_context_area(bundle.Context_Area),
         bundle_member_entries=[_extract_bundle_member_entry(x) for x in bundle.find_all("Bundle_Member_Entry")],
-        file_area=_extract_file_area(bundle.File_Area_Text) if bundle.File_Area_Text else None
+        file_areas=[_extract_file_area(f) for f in bundle.find_all("File_Area_Text")]
     )
 
 
@@ -47,7 +47,7 @@ def extract_product_observational(product_observational: bs4.Tag, checksum: str)
         identification_area=_extract(product_observational.Identification_Area, _extract_identification_area),
         context_area=_extract(product_observational.Observation_Area, _extract_observation_area),
         discipline_area=_extract(product_observational.Discipline_Area, _extract_discipline_area),
-        file_area=_extract_file_area(product_observational.File_Area_Observational)
+        file_areas=[_extract_file_area(f) for f in product_observational.find_all("File_Area_Observational")]
     )
 
 
@@ -60,7 +60,7 @@ def extract_product_ancillary(product_ancillary: bs4.Tag, checksum: str) -> Prod
         identification_area=_extract(product_ancillary.Identification_Area, _extract_identification_area),
         context_area=_extract(product_ancillary.Context_Area, _extract_context_area),
         discipline_area=_extract(product_ancillary.Discipline_Area, _extract_discipline_area),
-        file_area=_extract_file_area(product_ancillary.File_Area_Ancillary)
+        file_areas=[_extract_file_area(f) for f in product_ancillary.find_all("File_Area_Ancillary")]
     )
 
 
