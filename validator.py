@@ -116,6 +116,9 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
                                for x in delta_bundle.bundle_member_entries
                                if x.livdid_reference]
 
+    errors.extend(_check_vid_presence(previous_collection_lidvids))
+    errors.extend(_check_vid_presence(delta_collection_lidvids))
+
     for next_collection_lidvid in delta_collection_lidvids:
         matching_lidvids = [x for x in previous_collection_lidvids if x.lid == next_collection_lidvid.lid]
         if matching_lidvids:
@@ -130,6 +133,14 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
             errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the new collection"))
 
     return errors
+
+def _check_vid_presence(lidvids: Iterable[LidVid]) -> Iterable[ValidationError]:
+    """
+    Checl that a LIDVID actually has a VID. The parser is tolerant, and will return a negative VID if one isn't supplied
+    :param lidvids: A list of LIDVIDs
+    :return: A list of validation errors
+    """
+    return (ValidationError(f"Vid not provided for {x.lid}") for x in lidvids if x.vid.major < 0)
 
 def _check_lidvid_increment(previous_lidvid: LidVid, delta_lidvid: LidVid, same=True, minor=True, major=True) -> List[ValidationError]:
     """
