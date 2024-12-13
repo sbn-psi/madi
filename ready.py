@@ -28,8 +28,9 @@ def check_ready(previous_fullbundle, delta_fullbundle) -> None:
     logger.info(f"Checking readiness of delta bundle {delta_bundle_directory} against {previous_bundle_directory} - Complete")
 
     if len(errors) > 0:
-        func = lambda x: f"{x.severity} - {x.error_type}"
-        summary_lines = "\n".join(f"  {k}: {len(list(v))}" for (k, v) in itertools.groupby(errors, func))
+        summary_lines = "\n".join(
+            f"  {severity} - {error_type}: {len(list(v))}" for ((severity, error_type), v) in itertools.groupby(errors, operator.attrgetter("severity", "error_type"))
+        )
         logger.info(f"Error summary:\n{summary_lines}\nTotal: {len(errors)}")
 
         if any(e.severity == "error" for e in errors):
