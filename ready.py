@@ -46,7 +46,7 @@ def do_checkready(previous_fullbundle: pds4.FullBundle,
     for collection in delta_fullbundle.collections + previous_fullbundle.collections:
         errors.extend(validator.check_vid_presence(collection.inventory.products()))
 
-    if not errors:
+    if not any(e.severity == "error" for e in errors):
         for delta_collection in delta_fullbundle.collections:
             new_collection_lid = delta_collection.label.identification_area.lidvid.lid
             previous_collections = [x for x in previous_fullbundle.collections if
