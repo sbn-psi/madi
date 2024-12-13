@@ -30,7 +30,9 @@ def check_ready(previous_fullbundle, delta_fullbundle) -> None:
     if len(errors) > 0:
         summary_lines = "\n".join(f"  {k}: {len(list(v))}" for (k, v) in itertools.groupby(errors, operator.attrgetter("error_type")))
         logger.info(f"Error summary:\n{summary_lines}\nTotal: {len(errors)}")
-        raise Exception("Validation errors encountered")
+
+        if any(e.severity == "error" for e in errors):
+            raise Exception("Validation errors encountered")
     else:
         logger.info("No errors encountered")
 

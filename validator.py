@@ -11,11 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationError:
-    def __init__(self, message: str, error_type: str):
-        logger.error(message)
+    def __init__(self, message: str, error_type: str, severity: str = "error"):
+        if severity == "error":
+            logger.error(message)
+        else:
+            logger.warning(message)
             
         self.message = message
         self.error_type = error_type
+        self.severity = severity
 
 
 def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct) -> List[ValidationError]:
@@ -125,7 +129,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
             errors.append(ValidationError(f"{next_collection_lidvid} does not have a corresponding LidVid in the previous bundle", "collection_missing_from_previous_bundle"))
 
     for previous_collection_lidvid in previous_collection_lidvids:
-        matching_lidvids = [x for x in previous_collection_lidvids if x.lid == previous_collection_lidvid.lid]
+        matching_lidvids = [x for x in delta_collection_lidvids if x.lid == previous_collection_lidvid.lid]
         if not matching_lidvids:
             errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the delta bundle", "collection_missing_from_delta_bundle"))
 
