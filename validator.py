@@ -11,14 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationError:
-    def __init__(self, message: str, fatal: bool = False):
-        if fatal:
-            logger.fatal(message)
-        else:
-            logger.error(message)
+    def __init__(self, message: str, error_type: str):
+        logger.error(message)
             
         self.message = message
-        self.fatal = fatal
+        self.error_type = error_type
 
 
 def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct) -> List[ValidationError]:
@@ -107,7 +104,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
 
     for x in previous_bundle.bundle_member_entries + delta_bundle.bundle_member_entries:
         if not x.livdid_reference:
-            errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid"))
+            errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid", "non_lidvid_reference"))
 
     previous_collection_lidvids = [LidVid.parse(x.livdid_reference)
                         for x in previous_bundle.bundle_member_entries
@@ -125,12 +122,12 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
             matching_lidvid = matching_lidvids[0]
             errors.extend(_check_lidvid_increment(matching_lidvid, next_collection_lidvid))
         else:
-            errors.append(ValidationError(f"{next_collection_lidvid} does not have a corresponding LidVid in the previous collection"))
+            errors.append(ValidationError(f"{next_collection_lidvid} does not have a corresponding LidVid in the previous bundle", "collection_missing_from_previous_bundle"))
 
     for previous_collection_lidvid in previous_collection_lidvids:
         matching_lidvids = [x for x in previous_collection_lidvids if x.lid == previous_collection_lidvid.lid]
         if not matching_lidvids:
-            errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the new collection"))
+            errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the delta bundle", "collection_missing_from_delta_bundle"))
 
     return errors
 
@@ -140,7 +137,7 @@ def check_vid_presence(lidvids: Iterable[LidVid]) -> Iterable[ValidationError]:
     :param lidvids: A list of LIDVIDs
     :return: A list of validation errors
     """
-    return (ValidationError(f"Vid not provided for {x.lid}") for x in lidvids if x.vid.major < 0)
+    return (ValidationError(f"Vid not provided for {x.lid}", "missing_vid_From_lidvid") for x in lidvids if x.vid.major < 0)
 
 def _check_lidvid_increment(previous_lidvid: LidVid, delta_lidvid: LidVid, same=True, minor=True, major=True) -> List[ValidationError]:
     """
@@ -157,7 +154,7 @@ def _check_lidvid_increment(previous_lidvid: LidVid, delta_lidvid: LidVid, same=
               ([previous_lidvid.inc_minor()] if minor else []) + \
               ([previous_lidvid.inc_major()] if major else [])
     if delta_lidvid not in allowed:
-        errors.append(ValidationError(f"Invalid lidvid: {delta_lidvid}. Must be one of {[x.__str__() for x in allowed]}"))
+        errors.append(ValidationError(f"Invalid lidvid: {delta_lidvid}. Must be one of {[x.__str__() for x in allowed]}", "incorrectly_incremented_lidvid"))
     return errors
 
 
@@ -171,7 +168,7 @@ def _check_collection_duplicates(previous_collection: pds4.CollectionProduct,
     errors = []
     duplicates = delta_collection.inventory.products().intersection(previous_collection.inventory.products())
     if duplicates:
-        errors.append(ValidationError(f'Collection had duplicate products: {", ".join(x.__str__() for x in duplicates)}'))
+        errors.append(ValidationError(f'Collection had duplicate products: {", ".join(x.__str__() for x in duplicates)}', "duplicate_products"))
     return errors
 
 
@@ -184,11 +181,11 @@ def _check_for_modification_history(lbl: label.ProductLabel) -> List[ValidationE
     lidvid = lbl.identification_area.lidvid
     vid = lidvid.vid.__str__()
     if lbl.identification_area.modification_history is None:
-        errors.append(ValidationError(f"{lidvid} does not have a modification history"))
+        errors.append(ValidationError(f"{lidvid} does not have a modification history", "missing_modification_history"))
     else:
         versions = [detail.version_id for detail in lbl.identification_area.modification_history.modification_details]
         if vid not in versions:
-            errors.append(ValidationError(f'{lidvid} does not have a current modification history. Versions seen were: {versions}'))
+            errors.append(ValidationError(f'{lidvid} does not have a current modification history. Versions seen were: {versions}', "missing_current_modification_detail"))
 
     return errors
 
@@ -213,15 +210,15 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
         for pair in pairs:
             errors.extend(_compare_modifcation_detail(pair, prev_lidvid, delta_lidvid))
     else:
-        errors.append(ValidationError(f"{delta_lidvid} must contain at least as many modification details as {prev_lidvid}"))
+        errors.append(ValidationError(f"{delta_lidvid} must contain at least as many modification details as {prev_lidvid}", "not_enough_modification_details"))
 
     if delta_vid > prev_vid:
         if len(delta_details) != len(previous_details) + 1:
-            errors.append(ValidationError(f"{delta_lidvid} must contain one more modification detail than {prev_lidvid}"))
+            errors.append(ValidationError(f"{delta_lidvid} must contain one more modification detail than {prev_lidvid}", "incorrect_modification_detail_count_for_superseding_product"))
 
     if delta_vid == prev_vid:
         if len(delta_details) != len(previous_details):
-            errors.append(ValidationError(f"{delta_lidvid} must contain exactly as many modification details as {prev_lidvid}"))
+            errors.append(ValidationError(f"{delta_lidvid} must contain exactly as many modification details as {prev_lidvid}", "incorrect_modification_detail_count_for_non_superseding_product"))
 
     return errors
 
@@ -237,7 +234,7 @@ def _compare_modifcation_detail(pair: Tuple[labeltypes.ModificationDetail, label
     previous_detail, delta_detail = pair
     if not previous_detail == delta_detail:
         errors.append(ValidationError(f'{delta_lidvid} has a mismatched modification detail from {prev_lidvid}. '
-                                      f'The old modification detail was {previous_detail}, and the new one was {delta_detail}'))
+                                      f'The old modification detail was {previous_detail}, and the new one was {delta_detail}', "mismatched_modification_detail"))
     return errors
 
 
@@ -253,7 +250,7 @@ def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collec
         errors.append(ValidationError(f"{bundle_lidvid} does not contain the expected collection list: "
                         f"{','.join(x.__str__() for x in collection_lidvids)}"
                         f"Instead, it had: "
-                        f"{','.join(x.__str__() for x in bundle_member_lidvids)}"))
+                        f"{','.join(x.__str__() for x in bundle_member_lidvids)}", "declared_collection_mismatch"))
     return errors
 
 
@@ -266,7 +263,7 @@ def check_filename_consistency(previous_products: Iterable[pds4.BasicProduct], d
         if previous_product:
             errors.extend(_do_check_filename_consistency(previous_product, delta_product))
         else:
-            errors.append(ValidationError(f"Could not check filename consistency for {delta_product.lidvid()}. Previous product not found."))
+            errors.append(ValidationError(f"Could not check filename consistency for {delta_product.lidvid()}. Previous product not found.", "previous_product_missing"))
     return errors
 
 
@@ -277,7 +274,7 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
 
     if previous_label_filename != delta_label_filename:
         errors.append(ValidationError(
-            f"New product has inconsistent label filename. Was: {previous_label_filename}, Now: {delta_label_filename}"))
+            f"New product has inconsistent label filename. Was: {previous_label_filename}, Now: {delta_label_filename}", "product_inconsistent_filenames"))
     else:
         logger.info(f"Label Filename check for {delta_product.lidvid()}: OK. Filename: {delta_label_filename}")
 
@@ -286,7 +283,7 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
 
     if previous_data_filenames != delta_data_filenames:
         errors.append(ValidationError(
-            f"New product has inconsistent data filenames. Was: {','.join(previous_data_filenames)}, Now: {','.join(delta_data_filenames)}"))
+            f"New product has inconsistent data filenames. Was: {','.join(previous_data_filenames)}, Now: {','.join(delta_data_filenames)}", "data_inconsistent_filename"))
     else:
         logger.info(f"Data filename check for {delta_product.lidvid()}: OK. Filenames: {','.join(delta_data_filenames)}")
     return errors
