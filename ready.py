@@ -1,3 +1,6 @@
+import itertools
+import operator
+import typing
 from typing import List
 
 import pds4
@@ -25,10 +28,11 @@ def check_ready(previous_fullbundle, delta_fullbundle) -> None:
     logger.info(f"Checking readiness of delta bundle {delta_bundle_directory} against {previous_bundle_directory} - Complete")
 
     if len(errors) > 0:
-        for e in errors:
-            logger.error(e.message)
+        summary_lines = "\n".join(f"  {k}: {len(list(v))}" for (k, v) in itertools.groupby(errors, operator.attrgetter("error_type")))
+        logger.info(f"Error summary:\n{summary_lines}\nTotal: {len(errors)}")
         raise Exception("Validation errors encountered")
-
+    else:
+        logger.info("No errors encountered")
 
 def do_checkready(previous_fullbundle: pds4.FullBundle,
                   delta_fullbundle: pds4.FullBundle) -> List[validator.ValidationError]:
