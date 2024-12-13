@@ -11,11 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationError:
-    def __init__(self, message: str, error_type: str):
-        logger.error(message)
+    def __init__(self, message: str, error_type: str, severity: str = "error"):
+        if severity == "error":
+            logger.error(message)
+        else:
+            logger.warning(message)
             
         self.message = message
         self.error_type = error_type
+        self.severity = severity
 
 
 def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct) -> List[ValidationError]:
@@ -125,7 +129,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
             errors.append(ValidationError(f"{next_collection_lidvid} does not have a corresponding LidVid in the previous bundle", "collection_missing_from_previous_bundle"))
 
     for previous_collection_lidvid in previous_collection_lidvids:
-        matching_lidvids = [x for x in previous_collection_lidvids if x.lid == previous_collection_lidvid.lid]
+        matching_lidvids = [x for x in delta_collection_lidvids if x.lid == previous_collection_lidvid.lid]
         if not matching_lidvids:
             errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the delta bundle", "collection_missing_from_delta_bundle"))
 
@@ -245,12 +249,10 @@ def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collec
     logger.info(f'Checking collections references in {bundle.identification_area.lidvid}')
     errors = []
     bundle_member_lidvids = set(LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
-    bundle_lidvid = bundle.identification_area.lidvid
-    if not collection_lidvids == bundle_member_lidvids:
-        errors.append(ValidationError(f"{bundle_lidvid} does not contain the expected collection list: "
-                        f"{','.join(x.__str__() for x in collection_lidvids)}"
-                        f"Instead, it had: "
-                        f"{','.join(x.__str__() for x in bundle_member_lidvids)}", "declared_collection_mismatch"))
+
+    errors.extend(ValidationError(f"{c} not found in bundle member entry list", "collection_not_declared") for c in collection_lidvids - bundle_member_lidvids)
+    errors.extend(ValidationError(f"{b} was declared, but no collection is present", "declared collection not found", "warning") for b in bundle_member_lidvids - collection_lidvids)
+
     return errors
 
 
