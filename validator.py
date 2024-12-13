@@ -65,7 +65,7 @@ def _check_modification_history(previous_collection: pds4.Pds4Product, delta_col
     errors = []
     errors.extend(_check_for_modification_history(previous_collection.label))
     errors.extend(_check_for_modification_history(delta_collection.label))
-    if not errors:
+    if not any(e.severity == "error" for e in errors):
         errors.extend(_check_for_preserved_modification_history(previous_collection.label, delta_collection.label))
     return errors
 
