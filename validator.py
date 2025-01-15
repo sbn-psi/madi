@@ -14,8 +14,10 @@ class ValidationError:
     def __init__(self, message: str, error_type: str, severity: str = "error"):
         if severity == "error":
             logger.error(message)
-        else:
+        elif severity == "warning":
             logger.warning(message)
+        else:
+            raise Exception("Unsupported severity")
             
         self.message = message
         self.error_type = error_type
