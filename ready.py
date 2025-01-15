@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def check_ready(previous_fullbundle, delta_fullbundle) -> None:
+def check_ready(previous_fullbundle, delta_fullbundle, jaxa: bool) -> None:
     previous_bundle_directory = previous_fullbundle.path
     delta_bundle_directory = delta_fullbundle.path
 
@@ -23,7 +23,7 @@ def check_ready(previous_fullbundle, delta_fullbundle) -> None:
     for bundle in delta_fullbundle.bundles:
         logger.info(f'Delta bundle checksum: {bundle.label.checksum}')
 
-    errors = do_checkready(previous_fullbundle, delta_fullbundle)
+    errors = do_checkready(previous_fullbundle, delta_fullbundle, jaxa)
 
     logger.info(f"Checking readiness of delta bundle {delta_bundle_directory} against {previous_bundle_directory} - Complete")
 
@@ -39,9 +39,9 @@ def check_ready(previous_fullbundle, delta_fullbundle) -> None:
         logger.info("No errors encountered")
 
 def do_checkready(previous_fullbundle: pds4.FullBundle,
-                  delta_fullbundle: pds4.FullBundle) -> List[validator.ValidationError]:
+                  delta_fullbundle: pds4.FullBundle, jaxa: bool) -> List[validator.ValidationError]:
     errors = []
-    errors.extend(validator.check_bundle_against_previous(previous_fullbundle.bundles[0], delta_fullbundle.bundles[0]))
+    errors.extend(validator.check_bundle_against_previous(previous_fullbundle.bundles[0], delta_fullbundle.bundles[0], jaxa))
     errors.extend(validator.check_bundle_against_collections(delta_fullbundle.bundles[0], delta_fullbundle.collections))
 
     for collection in delta_fullbundle.collections + previous_fullbundle.collections:

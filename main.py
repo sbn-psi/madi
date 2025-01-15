@@ -37,7 +37,7 @@ def main() -> None:
     previous_fullbundle = bundleloader.load_local_bundle(args.previous_bundle_directory)
     delta_fullbundle = bundleloader.load_local_bundle(args.delta_bundle_directory)
 
-    check_ready(previous_fullbundle, delta_fullbundle)
+    check_ready(previous_fullbundle, delta_fullbundle, args.jaxa)
 
     if args.supersede:
         supersede(previous_fullbundle, delta_fullbundle, args.supersede, args.dry)

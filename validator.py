@@ -24,7 +24,7 @@ class ValidationError:
         self.severity = severity
 
 
-def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct) -> List[ValidationError]:
+def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct, jaxa: bool) -> List[ValidationError]:
     """
     Performs bundle level checks, comparing the delta bundle to the previous bundle:
         * Compare the bundle version numbers
@@ -32,7 +32,7 @@ def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bun
     logger.info(f"Checking delta bundle label {delta_bundle.lidvid()} against previous bundle label {previous_bundle.lidvid()}")
     errors = []
     errors.extend(_check_modification_history(previous_bundle, delta_bundle))
-    errors.extend(_check_bundle_increment(previous_bundle.label, delta_bundle.label))
+    errors.extend(_check_bundle_increment(previous_bundle.label, delta_bundle.label, jaxa))
     return errors
 
 
@@ -96,7 +96,7 @@ def _check_dict_increment(previous_lidvids: Dict[Lid, pds4.InventoryItem], delta
     return errors
 
 
-def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: label.ProductLabel) -> List[ValidationError]:
+def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: label.ProductLabel, jaxa: bool) -> List[ValidationError]:
     """
     Check that the LIDVIDs of both the bundle and any declared bundle member entries have been incremented
     correctly.
@@ -130,10 +130,11 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
         else:
             errors.append(ValidationError(f"{next_collection_lidvid} does not have a corresponding LidVid in the previous bundle", "collection_missing_from_previous_bundle"))
 
-    for previous_collection_lidvid in previous_collection_lidvids:
-        matching_lidvids = [x for x in delta_collection_lidvids if x.lid == previous_collection_lidvid.lid]
-        if not matching_lidvids:
-            errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the delta bundle", "collection_missing_from_delta_bundle"))
+    if not jaxa:
+        for previous_collection_lidvid in previous_collection_lidvids:
+            matching_lidvids = [x for x in delta_collection_lidvids if x.lid == previous_collection_lidvid.lid]
+            if not matching_lidvids:
+                errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the delta bundle", "collection_missing_from_delta_bundle"))
 
     return errors
 
