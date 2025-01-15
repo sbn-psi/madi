@@ -62,6 +62,7 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
                                   previous_products_to_supersede),
                   previous_bundle_directory,
                   merged_bundle_directory, dry, superseded=True)
+    # TODO update the bundle so that it includes collections that were not declared in the delta (for jaxa)
     do_copy_label(itertools.chain(delta_fullbundle.collections,
                                   delta_fullbundle.bundles,
                                   delta_fullbundle.products), delta_bundle_directory, merged_bundle_directory, dry)
