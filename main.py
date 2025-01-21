@@ -40,7 +40,7 @@ def main() -> None:
     check_ready(previous_fullbundle, delta_fullbundle, args.jaxa)
 
     if args.supersede:
-        supersede(previous_fullbundle, delta_fullbundle, args.supersede, args.dry)
+        supersede(previous_fullbundle, delta_fullbundle, args.supersede, args.dry, args.jaxa)
 
 
 if __name__ == "__main__":

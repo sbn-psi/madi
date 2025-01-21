@@ -12,7 +12,11 @@ import re
 logger = logging.getLogger(__name__)
 
 
-def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullBundle, merged_bundle_directory, dry: bool) -> None:
+def merge_bundle_members(previous_bundles, delta_bundles, merged_bundle_directory, dry):
+    pass
+
+
+def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullBundle, merged_bundle_directory, dry: bool, jaxa: bool) -> None:
     """
     Merges the bundles together and supersedes any products that have a newer version.
     """
@@ -62,10 +66,13 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
                                   previous_products_to_supersede),
                   previous_bundle_directory,
                   merged_bundle_directory, dry, superseded=True)
-    # TODO update the bundle so that it includes collections that were not declared in the delta (for jaxa)
     do_copy_label(itertools.chain(delta_fullbundle.collections,
                                   delta_fullbundle.bundles,
                                   delta_fullbundle.products), delta_bundle_directory, merged_bundle_directory, dry)
+
+    # TODO update the bundle so that it includes collections that were not declared in the delta (for jaxa)
+    if jaxa:
+        merge_bundle_members(previous_fullbundle.bundles, delta_fullbundle.bundles, merged_bundle_directory, dry)
 
     do_copy_data(previous_products_to_keep, previous_bundle_directory, merged_bundle_directory, dry)
     do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, dry, superseded=True)
