@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def check_ready(previous_fullbundle, delta_fullbundle, jaxa: bool) -> None:
+def check_ready(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullBundle, jaxa: bool) -> None:
     previous_bundle_directory = previous_fullbundle.path
     delta_bundle_directory = delta_fullbundle.path
 
