@@ -1,7 +1,11 @@
 import itertools
+
+import label
+import lids
 import logging
 import os
 import shutil
+import xmlrpc.client
 from typing import List, Iterable, Tuple
 
 import paths
@@ -12,7 +16,23 @@ import re
 logger = logging.getLogger(__name__)
 
 
-def merge_bundle_members(previous_bundles, delta_bundles, merged_bundle_directory, dry):
+def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bundles: List[pds4.BundleProduct]) -> list[label.BundleMemberEntry]:
+    if len(delta_bundles) > 1:
+        raise Exception(f"Too many delta bundles: {len(delta_bundles)}")
+    delta_bundle = delta_bundles[0]
+    matching_bundles = [x for x in previous_bundles if x.lidvid().lid == delta_bundle.lidvid().lid]
+    delta_collection_lids = [lids.LidVid.parse(x.livdid_reference) for x in delta_bundle.label.bundle_member_entries]
+    if len(matching_bundles):
+        latest_previous_bundle = sorted(matching_bundles, key=lambda x: x.lidvid().vid, reverse=True)[0]
+        lids.dataclass()
+        missing_collections = [x for x in latest_previous_bundle.label.bundle_member_entries
+                               if lids.LidVid.parse(x.livdid_reference).lid not in delta_collection_lids]
+        print(missing_collections)
+        return missing_collections
+    return []
+
+
+def add_missing_collections(bundles: List[pds4.BundleProduct], missing_collections: List[label.BundleMemberEntry], merged_bundle_directory: str, dry: bool):
     pass
 
 
@@ -72,7 +92,8 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
 
     # TODO update the bundle so that it includes collections that were not declared in the delta (for jaxa)
     if jaxa:
-        merge_bundle_members(previous_fullbundle.bundles, delta_fullbundle.bundles, merged_bundle_directory, dry)
+        missing_collections = get_missing_collections(previous_fullbundle.bundles, delta_fullbundle.bundles)
+        add_missing_collections(delta_fullbundle.bundles, missing_collections, merged_bundle_directory, dry)
 
     do_copy_data(previous_products_to_keep, previous_bundle_directory, merged_bundle_directory, dry)
     do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, dry, superseded=True)
