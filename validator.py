@@ -108,6 +108,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
     delta_bundle_lidvid = delta_bundle.identification_area.lidvid
     errors.extend(_check_lidvid_increment(previous_bundle_lidvid, delta_bundle_lidvid, same=False))
 
+    # verify that all collections are referenced by vid
     for x in previous_bundle.bundle_member_entries + delta_bundle.bundle_member_entries:
         if not x.livdid_reference:
             errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid", "non_lidvid_reference"))
@@ -119,9 +120,11 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
                                for x in delta_bundle.bundle_member_entries
                                if x.livdid_reference]
 
+    # ensure that any declared LIDVIDs actually have a VID component
     errors.extend(check_vid_presence(previous_collection_lidvids))
     errors.extend(check_vid_presence(delta_collection_lidvids))
 
+    # verify that all collections in the delta bundle also exist in the previous bundle
     for next_collection_lidvid in delta_collection_lidvids:
         matching_lidvids = [x for x in previous_collection_lidvids if x.lid == next_collection_lidvid.lid]
         if matching_lidvids:
@@ -130,6 +133,8 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
         else:
             errors.append(ValidationError(f"{next_collection_lidvid} does not have a corresponding LidVid in the previous bundle", "collection_missing_from_previous_bundle"))
 
+    # verify that all collections in the previous bundle also exist in the delta bundle
+    # this requirement has been waived for JAXA bundles
     if not jaxa:
         for previous_collection_lidvid in previous_collection_lidvids:
             matching_lidvids = [x for x in delta_collection_lidvids if x.lid == previous_collection_lidvid.lid]
