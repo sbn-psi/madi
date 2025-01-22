@@ -60,8 +60,18 @@ By default, MADI does not actually supersede anything, and only runs a readiness
 
 Once you run this, MADI will perform a series of checks on your bundle, collections, and data products, and send the results to a terminal. Any problems will appear with the prefix WARNING or ERROR.
 
+## Usage - Supersede
+
+By default, MADI does not actually supersede anything, and only runs a readiness check. If you want to supersede a bundle, you will need to specify a destination directory for the merged bundle:
+
+`(venv)  $ /path/to/madi/main.py -s merged_bundle_directory previous_bundle_directory delta_bundle_directory`
+
+Once you run this, MADI will perform a series of checks on your bundle, collections, and data products, and send the results to a terminal. Any problems will appear with the prefix WARNING or ERROR. If there are no problems, then a merged bundle will be placed in the specified directory. Old versions of products will be placed in the SUPERSEDED directories next to their original location.
+
+
 ### Additional options
 
 * `-d`: Debug mode. This will send additional information to the terminal. The can be a lot of information.
+* `-j`: JAXA mode. This will suppress certain checks, and perform updates to the bundle label. This is the only case where the bundle label is modified. JAXA use only.
 * `-l LOGFILE`: Sends output to the specified logfile instead of your terminal.
 

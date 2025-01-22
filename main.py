@@ -17,6 +17,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("previous_bundle_directory", type=str)
     parser.add_argument("delta_bundle_directory", type=str)
+    parser.add_argument("-j", "--jaxa", action="store_true")
     parser.add_argument("-s", "--supersede", type=str)
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-l", "--logfile", type=str)
@@ -36,10 +37,10 @@ def main() -> None:
     previous_fullbundle = bundleloader.load_local_bundle(args.previous_bundle_directory)
     delta_fullbundle = bundleloader.load_local_bundle(args.delta_bundle_directory)
 
-    check_ready(previous_fullbundle, delta_fullbundle)
+    check_ready(previous_fullbundle, delta_fullbundle, args.jaxa)
 
     if args.supersede:
-        supersede(previous_fullbundle, delta_fullbundle, args.supersede, args.dry)
+        supersede(previous_fullbundle, delta_fullbundle, args.supersede, args.dry, args.jaxa)
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ class ValidationError:
         self.severity = severity
 
 
-def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct) -> List[ValidationError]:
+def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct, jaxa: bool) -> List[ValidationError]:
     """
     Performs bundle level checks, comparing the delta bundle to the previous bundle:
         * Compare the bundle version numbers
@@ -32,7 +32,7 @@ def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bun
     logger.info(f"Checking delta bundle label {delta_bundle.lidvid()} against previous bundle label {previous_bundle.lidvid()}")
     errors = []
     errors.extend(_check_modification_history(previous_bundle, delta_bundle))
-    errors.extend(_check_bundle_increment(previous_bundle.label, delta_bundle.label))
+    errors.extend(_check_bundle_increment(previous_bundle.label, delta_bundle.label, jaxa))
     return errors
 
 
@@ -96,7 +96,7 @@ def _check_dict_increment(previous_lidvids: Dict[Lid, pds4.InventoryItem], delta
     return errors
 
 
-def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: label.ProductLabel) -> List[ValidationError]:
+def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: label.ProductLabel, jaxa: bool) -> List[ValidationError]:
     """
     Check that the LIDVIDs of both the bundle and any declared bundle member entries have been incremented
     correctly.
@@ -108,6 +108,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
     delta_bundle_lidvid = delta_bundle.identification_area.lidvid
     errors.extend(_check_lidvid_increment(previous_bundle_lidvid, delta_bundle_lidvid, same=False))
 
+    # verify that all collections are referenced by vid
     for x in previous_bundle.bundle_member_entries + delta_bundle.bundle_member_entries:
         if not x.livdid_reference:
             errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid", "non_lidvid_reference"))
@@ -119,9 +120,11 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
                                for x in delta_bundle.bundle_member_entries
                                if x.livdid_reference]
 
+    # ensure that any declared LIDVIDs actually have a VID component
     errors.extend(check_vid_presence(previous_collection_lidvids))
     errors.extend(check_vid_presence(delta_collection_lidvids))
 
+    # verify that all collections in the delta bundle also exist in the previous bundle
     for next_collection_lidvid in delta_collection_lidvids:
         matching_lidvids = [x for x in previous_collection_lidvids if x.lid == next_collection_lidvid.lid]
         if matching_lidvids:
@@ -130,10 +133,13 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
         else:
             errors.append(ValidationError(f"{next_collection_lidvid} does not have a corresponding LidVid in the previous bundle", "collection_missing_from_previous_bundle"))
 
-    for previous_collection_lidvid in previous_collection_lidvids:
-        matching_lidvids = [x for x in delta_collection_lidvids if x.lid == previous_collection_lidvid.lid]
-        if not matching_lidvids:
-            errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the delta bundle", "collection_missing_from_delta_bundle"))
+    # verify that all collections in the previous bundle also exist in the delta bundle
+    # this requirement has been waived for JAXA bundles
+    if not jaxa:
+        for previous_collection_lidvid in previous_collection_lidvids:
+            matching_lidvids = [x for x in delta_collection_lidvids if x.lid == previous_collection_lidvid.lid]
+            if not matching_lidvids:
+                errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the delta bundle", "collection_missing_from_delta_bundle"))
 
     return errors
 
@@ -143,7 +149,8 @@ def check_vid_presence(lidvids: Iterable[LidVid]) -> Iterable[ValidationError]:
     :param lidvids: A list of LIDVIDs
     :return: A list of validation errors
     """
-    return (ValidationError(f"Vid not provided for {x.lid}", "missing_vid_From_lidvid") for x in lidvids if x.vid.major < 0)
+    return (ValidationError(f"Vid not provided for {x.lid}", "missing_vid_From_lidvid") for x in lidvids if x.vid.major < 0 and x.lid.bundle != "context")
+
 
 def _check_lidvid_increment(previous_lidvid: LidVid, delta_lidvid: LidVid, same=True, minor=True, major=True) -> List[ValidationError]:
     """

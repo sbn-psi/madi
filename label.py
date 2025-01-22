@@ -20,7 +20,7 @@ def extract_collection(collection: bs4.Tag, checksum: str) -> ProductLabel:
     return ProductLabel(
         checksum=checksum,
         identification_area=_extract_identification_area(collection.Identification_Area),
-        context_area=_extract_context_area(collection.Context_Area),
+        context_area=_extract(collection.Context_Area, _extract_context_area),
         file_areas=[_extract_file_area(f) for f in collection.find_all("File_Area_Inventory")]
     )
 
@@ -32,7 +32,7 @@ def extract_bundle(bundle: bs4.Tag, checksum: str) -> ProductLabel:
     return ProductLabel(
         checksum=checksum,
         identification_area=_extract_identification_area(bundle.Identification_Area),
-        context_area=_extract_context_area(bundle.Context_Area),
+        context_area=_extract(bundle.Context_Area, _extract_context_area),
         bundle_member_entries=[_extract_bundle_member_entry(x) for x in bundle.find_all("Bundle_Member_Entry")],
         file_areas=[_extract_file_area(f) for f in bundle.find_all("File_Area_Text")]
     )
