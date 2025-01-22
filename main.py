@@ -17,7 +17,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("previous_bundle_directory", type=str)
     parser.add_argument("delta_bundle_directory", type=str)
-    parser.add_argument("-j", "--jaxa", type=str)
+    parser.add_argument("-j", "--jaxa", action="store_true")
     parser.add_argument("-s", "--supersede", type=str)
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-l", "--logfile", type=str)
