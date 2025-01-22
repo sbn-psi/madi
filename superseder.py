@@ -1,6 +1,7 @@
 import itertools
 
 import label
+import labeledit
 import lids
 import logging
 import os
@@ -32,8 +33,12 @@ def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bu
     return []
 
 
-def add_missing_collections(bundles: List[pds4.BundleProduct], missing_collections: List[label.BundleMemberEntry], merged_bundle_directory: str, dry: bool):
-    pass
+def add_missing_collections(bundles: List[pds4.BundleProduct], missing_collections: List[label.BundleMemberEntry], delta_bundle_directory: str, merged_bundle_directory: str, dry: bool):
+    for bundle in bundles:
+        original_path = paths.generate_product_path(bundle.label_path)
+        new_path = paths.relocate_path(original_path, delta_bundle_directory, merged_bundle_directory)
+        if not dry:
+            labeledit.inject_bundle_member_entries(new_path, missing_collections)
 
 
 def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullBundle, merged_bundle_directory, dry: bool, jaxa: bool) -> None:
@@ -93,7 +98,8 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
     # TODO update the bundle so that it includes collections that were not declared in the delta (for jaxa)
     if jaxa:
         missing_collections = get_missing_collections(previous_fullbundle.bundles, delta_fullbundle.bundles)
-        add_missing_collections(delta_fullbundle.bundles, missing_collections, merged_bundle_directory, dry)
+        if len(missing_collections):
+            add_missing_collections(delta_fullbundle.bundles, missing_collections, delta_bundle_directory, merged_bundle_directory, dry)
 
     do_copy_data(previous_products_to_keep, previous_bundle_directory, merged_bundle_directory, dry)
     do_copy_data(previous_products_to_supersede, previous_bundle_directory, merged_bundle_directory, dry, superseded=True)
