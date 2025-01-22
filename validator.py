@@ -149,7 +149,8 @@ def check_vid_presence(lidvids: Iterable[LidVid]) -> Iterable[ValidationError]:
     :param lidvids: A list of LIDVIDs
     :return: A list of validation errors
     """
-    return (ValidationError(f"Vid not provided for {x.lid}", "missing_vid_From_lidvid") for x in lidvids if x.vid.major < 0)
+    return (ValidationError(f"Vid not provided for {x.lid}", "missing_vid_From_lidvid") for x in lidvids if x.vid.major < 0 and x.lid.bundle != "context")
+
 
 def _check_lidvid_increment(previous_lidvid: LidVid, delta_lidvid: LidVid, same=True, minor=True, major=True) -> List[ValidationError]:
     """
