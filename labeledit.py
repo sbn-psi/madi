@@ -23,8 +23,9 @@ def inject_bundle_member_entries(labelpath: str, entries_to_add: Iterable[Bundle
         print(f"Adding collection {entry_to_add.livdid_reference}")
         bundle_member_entries.append(_bundle_member_entry_to_element(entry_to_add))
 
+    etree.indent(xmldoc, space="    ")
     with open(labelpath, "w") as outfile:
-        outfile.write(etree.tostring(xmldoc, method="xml", encoding="unicode"))
+        outfile.write(etree.tostring(xmldoc, pretty_print=True, method="xml", encoding="unicode"))
 
 
 def _bundle_member_entry_to_element(entry: BundleMemberEntry):
