@@ -27,4 +27,8 @@ def _bundle_member_entry_to_element(entry: BundleMemberEntry):
     member_status.text = entry.member_status
     bundle_member_entry.append(member_status)
 
+    reference_type = etree.Element("reference_type")
+    reference_type.text = entry.reference_type
+    bundle_member_entry.append(reference_type)
+
     return bundle_member_entry
