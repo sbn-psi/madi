@@ -1,32 +1,30 @@
 from typing import Iterable
 
-from bs4 import BeautifulSoup
+from lxml import etree
 
 from labeltypes import BundleMemberEntry
 
 
 def inject_bundle_member_entries(labelpath: str, entries_to_add: Iterable[BundleMemberEntry]):
-    with open(labelpath) as in_f:
-        xmldoc = BeautifulSoup(in_f, "lxml-xml")
-    bundle_member_entries = xmldoc.find("Bundle_Member_Entries")
+    xmldoc: etree = etree.parse(labelpath)
+    bundle_member_entries = xmldoc.find("//Bundle_Member_Entries")
 
-    bundle_member_entries.extend(
-        _bundle_member_entry_to_element(x, xmldoc) for x in entries_to_add
-    )
+    for entry_to_add in entries_to_add:
+        bundle_member_entries.append(_bundle_member_entry_to_element(entry_to_add))
 
-    with open(labelpath, "w") as out_f:
-        out_f.write(xmldoc.prettify())
+    with open(labelpath, "w") as outfile:
+        outfile.write(etree.tostring(xmldoc, method="xml", encoding="unicode"))
 
 
-def _bundle_member_entry_to_element(entry: BundleMemberEntry, xmldoc: BeautifulSoup):
-    bundle_member_entry = xmldoc.new_tag("Bundle_Member_Entry")
+def _bundle_member_entry_to_element(entry: BundleMemberEntry):
+    bundle_member_entry = etree.Element("Bundle_Member_Entry")
 
-    lidvid_reference = xmldoc.new_tag("lidvid_reference")
-    lidvid_reference.string = entry.livdid_reference
+    lidvid_reference = etree.Element("lidvid_reference")
+    lidvid_reference.text = entry.livdid_reference
     bundle_member_entry.append(lidvid_reference)
 
-    member_status = xmldoc.new_tag("member_status")
-    member_status.string = entry.member_status
+    member_status = etree.Element("member_status")
+    member_status.text = entry.member_status
     bundle_member_entry.append(member_status)
 
     return bundle_member_entry
