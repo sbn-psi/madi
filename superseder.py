@@ -28,7 +28,7 @@ def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bu
         lids.dataclass()
         missing_collections = [x for x in latest_previous_bundle.label.bundle_member_entries
                                if lids.LidVid.parse(x.livdid_reference).lid not in delta_collection_lids]
-        print(missing_collections)
+        logger.info(f"JAXA: Found the following missing collections: {missing_collections}")
         return missing_collections
     return []
 
@@ -37,6 +37,7 @@ def add_missing_collections(bundles: List[pds4.BundleProduct], missing_collectio
     for bundle in bundles:
         original_path = paths.generate_product_path(bundle.label_path)
         new_path = paths.relocate_path(original_path, delta_bundle_directory, merged_bundle_directory)
+        logger.info(f"JAXA: Adding additional collections to bundle label at {new_path}")
         if not dry:
             labeledit.inject_bundle_member_entries(new_path, missing_collections)
 
