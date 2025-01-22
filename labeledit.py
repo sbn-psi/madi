@@ -7,7 +7,7 @@ from labeltypes import BundleMemberEntry
 
 def inject_bundle_member_entries(labelpath: str, entries_to_add: Iterable[BundleMemberEntry]):
     xmldoc: etree = etree.parse(labelpath)
-    bundle_member_entries = xmldoc.find("//Bundle_Member_Entries")
+    bundle_member_entries = xmldoc.find("//Product_Bundle")
 
     for entry_to_add in entries_to_add:
         bundle_member_entries.append(_bundle_member_entry_to_element(entry_to_add))
