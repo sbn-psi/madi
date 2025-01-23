@@ -113,7 +113,7 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
 
     do_copy_inventory(previous_collections_to_supersede, previous_bundle_directory, merged_bundle_directory, superseded=True, dry=dry)
 
-    copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, delta_bundle_directory, dry)
+    copy_unmodified_collections(previous_collections_to_keep, previous_bundle_directory, merged_bundle_directory, dry)
     generate_collections(previous_collections_to_supersede,
                          delta_fullbundle.collections,
                          previous_bundle_directory,
@@ -167,8 +167,8 @@ def generate_collection(previous_collection: pds4.CollectionProduct,
     delta_count = len(delta_collection.inventory.products())
     product_count = len(inventory.products())
     logger.info(f"Merged collection has {product_count} products after adding {delta_count} to {previous_count}")
-    inventory_path = paths.relocate_path(previous_collection.inventory_path,
-                                         previous_bundle_directory,
+    inventory_path = paths.relocate_path(delta_collection.inventory_path,
+                                         delta_bundle_directory,
                                          merged_bundle_directory)
 
     if not dry:
@@ -257,6 +257,8 @@ def copy_unmodified_collections(collections: Iterable[pds4.Pds4Product], old_bas
     """
     Copies collection labels and inventories that should be passed through as-is to a new directory
     """
+    collections_to_copy = list(collections)
+    logger.info(f"Copying unmodified collections from {old_base} to {new_base} : {[str(x.label.identification_area.lidvid) for x in collections_to_copy]}")
     for c in collections:
         if isinstance(c, pds4.CollectionProduct):
             new_path = paths.relocate_path(paths.generate_product_path(c.inventory_path), old_base, new_base)
