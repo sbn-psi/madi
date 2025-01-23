@@ -1,8 +1,12 @@
+
 from typing import Iterable
 
 from lxml import etree
 
 from labeltypes import BundleMemberEntry
+
+import logging
+logger = logging.getLogger(__name__)
 
 def ns(nsid, version=1):
     return nsid, f'http://pds.nasa.gov/pds4/{nsid}/v{version}'
@@ -15,12 +19,11 @@ NSMAP = dict([ns(n) for n in DICTIONARIES])
 
 def inject_bundle_member_entries(labelpath: str, entries_to_add: Iterable[BundleMemberEntry]):
     xmldoc: etree = etree.parse(labelpath)
-    print(NSMAP)
     find_bundle = etree.ETXPath("//{%s}Product_Bundle" % NSMAP["pds"])
     bundle_member_entries = find_bundle(xmldoc)[0]
 
     for entry_to_add in entries_to_add:
-        print(f"Adding collection {entry_to_add.livdid_reference}")
+        logger.info(f"Adding collection {entry_to_add.livdid_reference}")
         bundle_member_entries.append(_bundle_member_entry_to_element(entry_to_add))
 
     etree.indent(xmldoc, space="    ")
@@ -35,7 +38,6 @@ def _bundle_member_entry_to_element(entry: BundleMemberEntry):
     bundle_member_entry.append(_text_element("member_status", entry.member_status))
     bundle_member_entry.append(_text_element("reference_type", entry.reference_type))
 
-    print(etree.tostring(bundle_member_entry))
     return bundle_member_entry
 
 
