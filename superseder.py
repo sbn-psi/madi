@@ -1,3 +1,4 @@
+import hashlib
 import itertools
 
 import label
@@ -171,23 +172,18 @@ def generate_collection(previous_collection: pds4.CollectionProduct,
                                          delta_bundle_directory,
                                          merged_bundle_directory)
 
+    inventory_contents = inventory.to_csv() + "\r\n"
     if not dry:
         logger.info(f"Writing merged inventory to {inventory_path}")
         with open(inventory_path, 'w') as f:
-            f.write(inventory.to_csv())
+            f.write(inventory_contents)
     else:
         logger.info(f"Skipped: Writing merged inventory to {inventory_path}")
 
-    inventory_label_contents = open(delta_collection.label_path).read()
-    new_inventory_label_contents = re.sub(r"<records>\d*</records>", f"<records>{product_count}</records>",
-                                          inventory_label_contents)
     new_path = paths.relocate_path(delta_collection.label_path, delta_bundle_directory, merged_bundle_directory)
-
+    checksum = hashlib.md5(inventory_contents.encode('utf-8')).hexdigest()
     if not dry:
-        logger.info(f"Writing new inventory label to f{new_path}")
-        open(new_path, "w").write(new_inventory_label_contents)
-    else:
-        logger.info(f"Skipped: Writing new inventory label to f{new_path}")
+        labeledit.update_collection_inventory(delta_collection.label_path, new_path, product_count, len(inventory_contents), checksum)
 
 
 def report_superseded(products_to_keep: List[pds4.Pds4Product],
