@@ -167,8 +167,8 @@ def generate_collection(previous_collection: pds4.CollectionProduct,
     delta_count = len(delta_collection.inventory.products())
     product_count = len(inventory.products())
     logger.info(f"Merged collection has {product_count} products after adding {delta_count} to {previous_count}")
-    inventory_path = paths.relocate_path(previous_collection.inventory_path,
-                                         previous_bundle_directory,
+    inventory_path = paths.relocate_path(delta_collection.inventory_path,
+                                         delta_bundle_directory,
                                          merged_bundle_directory)
 
     if not dry:
