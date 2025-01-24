@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
+import itertools
+import operator
 import sys
 import argparse
 
 import bundleloader
 import localclient
-from ready import check_ready
+from ready import check_ready,report_errors
 
 import logging
 
 from superseder import supersede
+from validator import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +40,12 @@ def main() -> None:
     previous_fullbundle = bundleloader.load_local_bundle(args.previous_bundle_directory)
     delta_fullbundle = bundleloader.load_local_bundle(args.delta_bundle_directory)
 
-    check_ready(previous_fullbundle, delta_fullbundle, args.jaxa)
+    errors = check_ready(previous_fullbundle, delta_fullbundle, args.jaxa)
 
-    if args.supersede:
+    if not len(errors) and args.supersede:
         supersede(previous_fullbundle, delta_fullbundle, args.supersede, args.dry, args.jaxa)
+
+    report_errors(errors, previous_fullbundle.path, delta_fullbundle.path)
 
 
 if __name__ == "__main__":

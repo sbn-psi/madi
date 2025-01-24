@@ -10,8 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
-def check_ready(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullBundle, jaxa: bool) -> None:
+def check_ready(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullBundle, jaxa: bool) -> list[validator.ValidationError]:
     previous_bundle_directory = previous_fullbundle.path
     delta_bundle_directory = delta_fullbundle.path
 
@@ -24,8 +23,11 @@ def check_ready(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.Ful
         logger.info(f'Delta bundle checksum: {bundle.label.checksum}')
 
     errors = do_checkready(previous_fullbundle, delta_fullbundle, jaxa)
-
     logger.info(f"Checking readiness of delta bundle {delta_bundle_directory} against {previous_bundle_directory} - Complete")
+    return errors
+
+
+def report_errors(errors: list[validator.ValidationError], previous_bundle_directory, delta_bundle_directory):
 
     if len(errors) > 0:
         summary_lines = "\n".join(
@@ -37,6 +39,7 @@ def check_ready(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.Ful
             raise Exception("Validation errors encountered")
     else:
         logger.info("No errors encountered")
+
 
 def do_checkready(previous_fullbundle: pds4.FullBundle,
                   delta_fullbundle: pds4.FullBundle, jaxa: bool) -> List[validator.ValidationError]:
