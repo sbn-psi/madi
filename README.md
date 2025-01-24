@@ -6,6 +6,12 @@ PDS4 has complex bundle versioning requirements, and it can be difficult to asse
 MADI aims to simplify this process by requiring only new and changed files to be delivered. 
 These changes will then be verified and integrated into the bundle automatically.
 
+Mission archivers and other PDS data providers will use the Readness Check function of MADI to confirm that a delta 
+bundle is ready for MADI before delivering it to SBN. 
+
+After delivery of the delta bundle, SBN will run the Readiness Check again to confirm, then run the Integrate function 
+to integrate the delta bundle into the archived bundle, producing a new version of the bundle. 
+
 ## Installation
 
 ### Checking out the code
