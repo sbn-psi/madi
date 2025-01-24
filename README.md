@@ -61,7 +61,7 @@ it all at once.
 
 ## Usage - Readiness Check
 
-By default, MADI does not actually supersede anything, and only runs a readiness check. You can perform this readiness 
+By default, MADI does not actually integrate anything, and only runs a readiness check. You can perform this readiness 
 check with the following command:
 
 `(venv)  $ /path/to/madi/main.py previous_bundle_directory delta_bundle_directory`
@@ -69,16 +69,16 @@ check with the following command:
 Once you run this, MADI will perform a series of checks on your bundle, collections, and data products, and send the 
 results to a terminal. Any problems will appear with the prefix WARNING or ERROR.
 
-## Usage - Supersede
+## Usage - Integrate
 
-By default, MADI does not actually supersede anything, and only runs a readiness check. If you want to supersede a 
-bundle, you will need to specify a destination directory for the merged bundle:
+By default, MADI does not actually integrate anything, and only runs a readiness check. If you want to integrate a 
+bundle, you will need to specify a destination directory for the integrated bundle:
 
-`(venv)  $ /path/to/madi/main.py -s merged_bundle_directory previous_bundle_directory delta_bundle_directory`
+`(venv)  $ /path/to/madi/main.py -s intgrated_bundle_directory previous_bundle_directory delta_bundle_directory`
 
 Once you run this, MADI will perform a series of checks on your bundle, collections, and data products, and send the 
-results to a terminal. Any problems will appear with the prefix WARNING or ERROR. If there are no problems, then a 
-merged bundle will be placed in the specified directory. Old versions of products will be placed in the SUPERSEDED 
+results to a terminal. Any problems will appear with the prefix WARNING or ERROR. If there are no problems, then an 
+integrated bundle will be placed in the specified directory. Old versions of products will be placed in the SUPERSEDED 
 directories next to their original location.
 
 
