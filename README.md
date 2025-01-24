@@ -67,8 +67,8 @@ it all at once.
 
 ## Usage - Readiness Check
 
-By default, MADI does not actually integrate anything, and only runs a readiness check. You can perform this readiness 
-check with the following command:
+By default, MADI just performs the readiness checks and returns a readiness report, without integrating the delta 
+bundle into the archived bundle. You can perform this readiness check with the following command:
 
 `(venv)  $ /path/to/madi/main.py previous_bundle_directory delta_bundle_directory`
 
@@ -77,10 +77,13 @@ results to a terminal. Any problems will appear with the prefix WARNING or ERROR
 
 ## Usage - Integrate
 
-By default, MADI does not actually integrate anything, and only runs a readiness check. If you want to integrate a 
-bundle, you will need to specify a destination directory for the integrated bundle:
+By default, MADI just performs the readiness checks and returns a readiness report.  If you want to integrate the delta
+bundle into the archived bundle to create a new version of the bundle, specify a destination directory for the 
+integrated bundle:
 
 `(venv)  $ /path/to/madi/main.py -s intgrated_bundle_directory previous_bundle_directory delta_bundle_directory`
+
+*Note:  Mission archivers don't need to use this function.*
 
 Once you run this, MADI will perform a series of checks on your bundle, collections, and data products, and send the 
 results to a terminal. Any problems will appear with the prefix WARNING or ERROR. If there are no problems, then an 
@@ -91,7 +94,7 @@ directories next to their original location.
 ### Additional options
 
 * `-d`: Debug mode. This will send additional information to the terminal. The can be a lot of information.
-* `-j`: JAXA mode. This will suppress certain checks, and perform updates to the bundle label. This is the only case 
-  where the bundle label is modified. JAXA use only.
+* `-j`: JAXA mode. Delta bundles produced by JAXA projects have a slightly different format.  
+  Use JAXA mode when performing Readiness Checks or Integration on bundles produced by JAXA projects.
 * `-l LOGFILE`: Sends output to the specified logfile instead of your terminal.
 
