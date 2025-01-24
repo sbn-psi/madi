@@ -51,7 +51,7 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
     previous_bundle_directory = previous_fullbundle.path
     delta_bundle_directory = delta_fullbundle.path
 
-    logger.info(f"TODO: Supersede {previous_bundle_directory} "
+    logger.info(f"Integrate {previous_bundle_directory} "
                 f"with delta data from {delta_bundle_directory} into {merged_bundle_directory}")
 
     previous_bundles_to_keep, previous_bundles_to_supersede = find_products_to_supersede(previous_fullbundle.bundles,
@@ -129,6 +129,9 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
         previous_bundle_directory,
         merged_bundle_directory,
         dry)
+
+    logger.info(f"Integrate {previous_bundle_directory} "
+                f"with delta data from {delta_bundle_directory} into {merged_bundle_directory} -- Complete")
 
 
 def generate_collections(previous_collections_to_supersede: List[pds4.Pds4Product],
