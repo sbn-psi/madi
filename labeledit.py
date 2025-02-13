@@ -23,7 +23,7 @@ def inject_bundle_member_entries(labelpath: str, entries_to_add: Iterable[Bundle
     bundle_member_entries = find_bundle(xmldoc)[0]
 
     for entry_to_add in entries_to_add:
-        logger.info(f"Adding collection {entry_to_add.livdid_reference}")
+        logger.info(f"Adding collection {entry_to_add.lidvid_reference}")
         bundle_member_entries.append(_bundle_member_entry_to_element(entry_to_add))
 
     etree.indent(xmldoc, space="    ")
@@ -34,7 +34,10 @@ def inject_bundle_member_entries(labelpath: str, entries_to_add: Iterable[Bundle
 def _bundle_member_entry_to_element(entry: BundleMemberEntry):
     bundle_member_entry = etree.Element("Bundle_Member_Entry")
 
-    bundle_member_entry.append(_text_element("lidvid_reference", entry.livdid_reference))
+    if entry.lidvid_reference:
+        bundle_member_entry.append(_text_element("lidvid_reference", entry.lidvid_reference))
+    if entry.lid_reference:
+        bundle_member_entry.append(_text_element("lid_reference", entry.lid_reference))
     bundle_member_entry.append(_text_element("member_status", entry.member_status))
     bundle_member_entry.append(_text_element("reference_type", entry.reference_type))
 

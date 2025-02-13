@@ -15,21 +15,23 @@ import pds4
 
 import re
 
+import validator
+
 logger = logging.getLogger(__name__)
 
 
-def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bundles: List[pds4.BundleProduct]) -> list[label.BundleMemberEntry]:
+def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bundles: List[pds4.BundleProduct], previous_collections: List[pds4.CollectionProduct]) -> list[label.BundleMemberEntry]:
     if len(delta_bundles) > 1:
         raise Exception(f"Too many delta bundles: {len(delta_bundles)}")
     delta_bundle = delta_bundles[0]
     matching_bundles = [x for x in previous_bundles if x.lidvid().lid == delta_bundle.lidvid().lid]
-    delta_collection_lids = [lids.LidVid.parse(x.livdid_reference).lid for x in delta_bundle.label.bundle_member_entries]
+    delta_collection_lids = [x.lidvid().lid for x in delta_bundle.label.bundle_member_entries]
     logger.info(f"Known collections LIDs: {delta_collection_lids}")
     if len(matching_bundles):
         latest_previous_bundle = sorted(matching_bundles, key=lambda x: x.lidvid().vid, reverse=True)[0]
         lids.dataclass()
-        missing_collections = [x for x in latest_previous_bundle.label.bundle_member_entries
-                               if lids.LidVid.parse(x.livdid_reference).lid not in delta_collection_lids]
+        missing_collections = [x for x in validator.patch_bundle_member_entries(latest_previous_bundle.label.bundle_member_entries, previous_collections)
+                               if x.lidvid().lid not in delta_collection_lids]
         logger.info(f"JAXA: Found the following missing collections: {missing_collections}")
         return missing_collections
     return []
@@ -100,7 +102,7 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
 
     # TODO update the bundle so that it includes collections that were not declared in the delta (for jaxa)
     if jaxa:
-        missing_collections = get_missing_collections(previous_fullbundle.bundles, delta_fullbundle.bundles)
+        missing_collections = get_missing_collections(previous_fullbundle.bundles, delta_fullbundle.bundles, previous_fullbundle.collections)
         if len(missing_collections):
             add_missing_collections(delta_fullbundle.bundles, missing_collections, delta_bundle_directory, merged_bundle_directory, dry)
 
