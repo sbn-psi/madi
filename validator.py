@@ -115,15 +115,11 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
         if not x.lidvid_reference:
             errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid", "non_lidvid_reference"))
 
-    previous_collection_lidvids = [LidVid.parse(x.lidvid_reference)
-                                   for x in previous_bundle.bundle_member_entries
-                                   if x.lidvid_reference]
-    delta_collection_lidvids = [LidVid.parse(x.lidvid_reference)
-                                for x in delta_bundle.bundle_member_entries
-                                if x.lidvid_reference]
+    previous_collection_lidvids = [x.lidvid() for x in previous_bundle.bundle_member_entries]
+    delta_collection_lidvids = [x.lidvid() for x in delta_bundle.bundle_member_entries]
 
     # ensure that any declared LIDVIDs actually have a VID component
-    errors.extend(check_vid_presence(previous_collection_lidvids))
+    #errors.extend(check_vid_presence(previous_collection_lidvids))
     errors.extend(check_vid_presence(delta_collection_lidvids))
 
     # verify that all collections in the delta bundle also exist in the previous bundle
@@ -165,11 +161,12 @@ def _check_lidvid_increment(previous_lidvid: LidVid, delta_lidvid: LidVid, same=
     """
     logger.info(f'Checking increment of {delta_lidvid} against {previous_lidvid}')
     errors = []
-    allowed = ([previous_lidvid] if same else []) + \
-              ([previous_lidvid.inc_minor()] if minor else []) + \
-              ([previous_lidvid.inc_major()] if major else [])
-    if delta_lidvid not in allowed:
-        errors.append(ValidationError(f"Invalid lidvid: {delta_lidvid}. Must be one of {[x.__str__() for x in allowed]}", "incorrectly_incremented_lidvid"))
+    if previous_lidvid.vid.major > 0:
+        allowed = ([previous_lidvid] if same else []) + \
+                  ([previous_lidvid.inc_minor()] if minor else []) + \
+                  ([previous_lidvid.inc_major()] if major else [])
+        if delta_lidvid not in allowed:
+            errors.append(ValidationError(f"Invalid lidvid: {delta_lidvid}. Must be one of {[x.__str__() for x in allowed]}", "incorrectly_incremented_lidvid"))
     return errors
 
 
