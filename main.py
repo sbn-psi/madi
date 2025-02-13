@@ -40,12 +40,12 @@ def main() -> None:
     previous_fullbundle = bundleloader.load_local_bundle(args.previous_bundle_directory)
     delta_fullbundle = bundleloader.load_local_bundle(args.delta_bundle_directory)
 
-    errors = check_ready(previous_fullbundle, delta_fullbundle, args.jaxa)
-
+    issues = check_ready(previous_fullbundle, delta_fullbundle, args.jaxa)
+    errors = [x for x in issues if x.severity == "error"]
     if not len(errors) and args.supersede:
         supersede(previous_fullbundle, delta_fullbundle, args.supersede, args.dry, args.jaxa)
 
-    report_errors(errors, previous_fullbundle.path, delta_fullbundle.path)
+    report_errors(issues, previous_fullbundle.path, delta_fullbundle.path)
 
 
 if __name__ == "__main__":

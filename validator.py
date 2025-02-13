@@ -115,11 +115,13 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
         if not x.lidvid_reference:
             errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid", "non_lidvid_reference"))
 
-    previous_collection_lidvids = [x.lidvid() for x in patch_bundle_member_entries(previous_bundle.bundle_member_entries, previous_collections)]
+    patched_entries, issues = patch_bundle_member_entries(previous_bundle.bundle_member_entries, previous_collections)
+    previous_collection_lidvids = [x.lidvid() for x in patched_entries]
     delta_collection_lidvids = [x.lidvid() for x in delta_bundle.bundle_member_entries]
 
     # ensure that any declared LIDVIDs actually have a VID component
     #errors.extend(check_vid_presence(previous_collection_lidvids))
+    errors.extend(issues)
     errors.extend(check_vid_presence(delta_collection_lidvids))
 
     # verify that all collections in the delta bundle also exist in the previous bundle
@@ -141,8 +143,9 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
 
     return errors
 
-def patch_bundle_member_entries(entries: List[label.BundleMemberEntry], collections: List[pds4.CollectionProduct]) -> List[label.BundleMemberEntry]:
+def patch_bundle_member_entries(entries: List[label.BundleMemberEntry], collections: List[pds4.CollectionProduct]) -> Tuple[List[label.BundleMemberEntry], List[ValidationError]]:
     result = []
+    issues = []
     for entry in entries:
         if entry.lidvid_reference:
             result.append(entry)
@@ -150,12 +153,12 @@ def patch_bundle_member_entries(entries: List[label.BundleMemberEntry], collecti
             matching_collections = [x for x in collections if x.lidvid().lid == entry.lidvid().lid]
             if matching_collections:
                 matching_collection = matching_collections[0]
-                logger.info(f"Patched lid-reference bundle member f{entry.lid_reference} with collection LIDVID from label: {matching_collection.lidvid()}")
+                issues.append(ValidationError(f"Patched lid-reference bundle member f{entry.lid_reference} with collection LIDVID from label: {matching_collection.lidvid()}", "patched_lid_reference_with_collection_lidvid", "warning"))
                 result.append(label.BundleMemberEntry(entry.member_status, entry.reference_type, None, str(matching_collection.lidvid())))
             else:
-                logger.info(f"Encountered lid-reference bundle member f{entry.lid_reference}. No collection was available to lookup LID")
+                issues.append(ValidationError(f"Encountered lid-reference bundle member f{entry.lid_reference}. No collection was available to lookup LID", "unpatchable_lid_reference", "warning"))
                 result.append(entry)
-    return result
+    return result, issues
 
 def check_vid_presence(lidvids: Iterable[LidVid]) -> Iterable[ValidationError]:
     """
