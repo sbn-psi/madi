@@ -15,10 +15,12 @@ import pds4
 
 import re
 
+import validator
+
 logger = logging.getLogger(__name__)
 
 
-def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bundles: List[pds4.BundleProduct]) -> list[label.BundleMemberEntry]:
+def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bundles: List[pds4.BundleProduct], previous_collections: List[pds4.CollectionProduct]) -> list[label.BundleMemberEntry]:
     if len(delta_bundles) > 1:
         raise Exception(f"Too many delta bundles: {len(delta_bundles)}")
     delta_bundle = delta_bundles[0]
@@ -28,7 +30,7 @@ def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bu
     if len(matching_bundles):
         latest_previous_bundle = sorted(matching_bundles, key=lambda x: x.lidvid().vid, reverse=True)[0]
         lids.dataclass()
-        missing_collections = [x for x in latest_previous_bundle.label.bundle_member_entries
+        missing_collections = [x for x in validator.patch_bundle_member_entries(latest_previous_bundle.label.bundle_member_entries, previous_collections)
                                if x.lidvid().lid not in delta_collection_lids]
         logger.info(f"JAXA: Found the following missing collections: {missing_collections}")
         return missing_collections
@@ -100,7 +102,7 @@ def supersede(previous_fullbundle: pds4.FullBundle, delta_fullbundle: pds4.FullB
 
     # TODO update the bundle so that it includes collections that were not declared in the delta (for jaxa)
     if jaxa:
-        missing_collections = get_missing_collections(previous_fullbundle.bundles, delta_fullbundle.bundles)
+        missing_collections = get_missing_collections(previous_fullbundle.bundles, delta_fullbundle.bundles, previous_fullbundle.collections)
         if len(missing_collections):
             add_missing_collections(delta_fullbundle.bundles, missing_collections, delta_bundle_directory, merged_bundle_directory, dry)
 

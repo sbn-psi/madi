@@ -44,7 +44,7 @@ def report_errors(errors: list[validator.ValidationError], previous_bundle_direc
 def do_checkready(previous_fullbundle: pds4.FullBundle,
                   delta_fullbundle: pds4.FullBundle, jaxa: bool) -> List[validator.ValidationError]:
     errors = []
-    errors.extend(validator.check_bundle_against_previous(previous_fullbundle.bundles[0], delta_fullbundle.bundles[0], jaxa))
+    errors.extend(validator.check_bundle_against_previous(previous_fullbundle.bundles[0], delta_fullbundle.bundles[0], jaxa, previous_fullbundle.collections))
     errors.extend(validator.check_bundle_against_collections(delta_fullbundle.bundles[0], delta_fullbundle.collections))
 
     for collection in delta_fullbundle.collections + previous_fullbundle.collections:

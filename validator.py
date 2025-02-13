@@ -26,7 +26,7 @@ class ValidationError:
         self.severity = severity
 
 
-def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct, jaxa: bool) -> List[ValidationError]:
+def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bundle: pds4.BundleProduct, jaxa: bool, previous_collections: List[pds4.CollectionProduct]) -> List[ValidationError]:
     """
     Performs bundle level checks, comparing the delta bundle to the previous bundle:
         * Compare the bundle version numbers
@@ -34,7 +34,7 @@ def check_bundle_against_previous(previous_bundle: pds4.BundleProduct, delta_bun
     logger.info(f"Checking delta bundle label {delta_bundle.lidvid()} against previous bundle label {previous_bundle.lidvid()}")
     errors = []
     errors.extend(_check_modification_history(previous_bundle, delta_bundle))
-    errors.extend(_check_bundle_increment(previous_bundle.label, delta_bundle.label, jaxa))
+    errors.extend(_check_bundle_increment(previous_bundle.label, delta_bundle.label, jaxa, previous_collections))
     return errors
 
 
@@ -98,7 +98,7 @@ def _check_dict_increment(previous_lidvids: Dict[Lid, pds4.InventoryItem], delta
     return errors
 
 
-def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: label.ProductLabel, jaxa: bool) -> List[ValidationError]:
+def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: label.ProductLabel, jaxa: bool, previous_collections: List[pds4.CollectionProduct]) -> List[ValidationError]:
     """
     Check that the LIDVIDs of both the bundle and any declared bundle member entries have been incremented
     correctly.
@@ -115,7 +115,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
         if not x.lidvid_reference:
             errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid", "non_lidvid_reference"))
 
-    previous_collection_lidvids = [x.lidvid() for x in previous_bundle.bundle_member_entries]
+    previous_collection_lidvids = [x.lidvid() for x in patch_bundle_member_entries(previous_bundle.bundle_member_entries, previous_collections)]
     delta_collection_lidvids = [x.lidvid() for x in delta_bundle.bundle_member_entries]
 
     # ensure that any declared LIDVIDs actually have a VID component
@@ -140,6 +140,22 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
                 errors.append(ValidationError(f"{previous_collection_lidvid} does not have a corresponding LidVid in the delta bundle", "collection_missing_from_delta_bundle"))
 
     return errors
+
+def patch_bundle_member_entries(entries: List[label.BundleMemberEntry], collections: List[pds4.CollectionProduct]) -> List[label.BundleMemberEntry]:
+    result = []
+    for entry in entries:
+        if entry.lidvid_reference:
+            result.append(entry)
+        else:
+            matching_collections = [x for x in collections if x.lidvid().lid == entry.lidvid().lid]
+            if matching_collections:
+                matching_collection = matching_collections[0]
+                logger.info(f"Patched lid-reference bundle member f{entry.lid_reference} with collection LIDVID from label: {matching_collection.lidvid()}")
+                result.append(label.BundleMemberEntry(entry.member_status, entry.reference_type, None, str(matching_collection.lidvid())))
+            else:
+                logger.info(f"Encountered lid-reference bundle member f{entry.lid_reference}. No collection was available to lookup LID")
+                result.append(entry)
+    return result
 
 def check_vid_presence(lidvids: Iterable[LidVid]) -> Iterable[ValidationError]:
     """
