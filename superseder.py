@@ -30,7 +30,8 @@ def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bu
     if len(matching_bundles):
         latest_previous_bundle = sorted(matching_bundles, key=lambda x: x.lidvid().vid, reverse=True)[0]
         lids.dataclass()
-        missing_collections = [x for x in validator.patch_bundle_member_entries(latest_previous_bundle.label.bundle_member_entries, previous_collections)
+        patched_entries, _ = validator.patch_bundle_member_entries(latest_previous_bundle.label.bundle_member_entries, previous_collections)
+        missing_collections = [x for x in patched_entries
                                if x.lidvid().lid not in delta_collection_lids]
         logger.info(f"JAXA: Found the following missing collections: {missing_collections}")
         return missing_collections
