@@ -1,3 +1,5 @@
+import operator
+
 import pds4
 import label
 import labeltypes
@@ -209,8 +211,9 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
     """
     errors = []
     logger.info(f'Checking consistency of modification history for {delta_collection.identification_area.lidvid} against {previous_collection.identification_area.lidvid}')
-    previous_details = previous_collection.identification_area.modification_history.modification_details
-    delta_details = delta_collection.identification_area.modification_history.modification_details
+
+    previous_details = sorted(previous_collection.identification_area.modification_history.modification_details, key=operator.attrgetter("version_id"))
+    delta_details = sorted(delta_collection.identification_area.modification_history.modification_details, key=operator.attrgetter("version_id"))
 
     delta_lidvid = delta_collection.identification_area.lidvid
     prev_lidvid = previous_collection.identification_area.lidvid
@@ -219,6 +222,7 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
     prev_vid = prev_lidvid.vid
 
     if len(delta_details) >= len(previous_details):
+
         pairs = zip(previous_details, delta_details[:len(previous_details)])
         for pair in pairs:
             errors.extend(_compare_modifcation_detail(pair, prev_lidvid, delta_lidvid))
