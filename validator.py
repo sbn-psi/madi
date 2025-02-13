@@ -111,7 +111,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
     errors.extend(_check_lidvid_increment(previous_bundle_lidvid, delta_bundle_lidvid, same=False))
 
     # verify that all collections are referenced by vid
-    for x in previous_bundle.bundle_member_entries + delta_bundle.bundle_member_entries:
+    for x in delta_bundle.bundle_member_entries:
         if not x.livdid_reference:
             errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid", "non_lidvid_reference"))
 
@@ -123,7 +123,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
                                if x.livdid_reference]
 
     # ensure that any declared LIDVIDs actually have a VID component
-    errors.extend(check_vid_presence(previous_collection_lidvids))
+    #errors.extend(check_vid_presence(previous_collection_lidvids))
     errors.extend(check_vid_presence(delta_collection_lidvids))
 
     # verify that all collections in the delta bundle also exist in the previous bundle
