@@ -261,7 +261,7 @@ def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collec
     """
     logger.info(f'Checking collections references in {bundle.identification_area.lidvid}')
     errors = []
-    bundle_member_lidvids = set(LidVid.parse(e.lidvid_reference) for e in bundle.bundle_member_entries)
+    bundle_member_lidvids = set(e.lidvid() for e in bundle.bundle_member_entries)
 
     errors.extend(ValidationError(f"{c} not found in bundle member entry list", "collection_not_declared") for c in collection_lidvids - bundle_member_lidvids)
     errors.extend(ValidationError(f"{b} was declared, but no collection is present", "declared collection not found", "warning") for b in bundle_member_lidvids - collection_lidvids)

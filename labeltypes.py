@@ -119,6 +119,9 @@ class BundleMemberEntry:
     lid_reference: str = None
     lidvid_reference: str = None
 
+    def lidvid(self) -> lids.LidVid:
+        return lids.LidVid.parse(self.lidvid_reference if self.lidvid_reference else self.lid_reference)
+
 
 @dataclass()
 class ProductLabel:
