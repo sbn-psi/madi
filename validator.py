@@ -123,7 +123,7 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
                                 if x.lidvid_reference]
 
     # ensure that any declared LIDVIDs actually have a VID component
-    #errors.extend(check_vid_presence(previous_collection_lidvids))
+    errors.extend(check_vid_presence(previous_collection_lidvids))
     errors.extend(check_vid_presence(delta_collection_lidvids))
 
     # verify that all collections in the delta bundle also exist in the previous bundle
