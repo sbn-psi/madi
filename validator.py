@@ -112,15 +112,15 @@ def _check_bundle_increment(previous_bundle: label.ProductLabel, delta_bundle: l
 
     # verify that all collections are referenced by vid
     for x in delta_bundle.bundle_member_entries:
-        if not x.livdid_reference:
+        if not x.lidvid_reference:
             errors.append(ValidationError(x.lid_reference + " is referenced by lid instead of lidvid", "non_lidvid_reference"))
 
-    previous_collection_lidvids = [LidVid.parse(x.livdid_reference)
-                        for x in previous_bundle.bundle_member_entries
-                        if x.livdid_reference]
-    delta_collection_lidvids = [LidVid.parse(x.livdid_reference)
-                               for x in delta_bundle.bundle_member_entries
-                               if x.livdid_reference]
+    previous_collection_lidvids = [LidVid.parse(x.lidvid_reference)
+                                   for x in previous_bundle.bundle_member_entries
+                                   if x.lidvid_reference]
+    delta_collection_lidvids = [LidVid.parse(x.lidvid_reference)
+                                for x in delta_bundle.bundle_member_entries
+                                if x.lidvid_reference]
 
     # ensure that any declared LIDVIDs actually have a VID component
     #errors.extend(check_vid_presence(previous_collection_lidvids))
@@ -261,7 +261,7 @@ def _check_bundle_for_latest_collections(bundle: labeltypes.ProductLabel, collec
     """
     logger.info(f'Checking collections references in {bundle.identification_area.lidvid}')
     errors = []
-    bundle_member_lidvids = set(LidVid.parse(e.livdid_reference) for e in bundle.bundle_member_entries)
+    bundle_member_lidvids = set(LidVid.parse(e.lidvid_reference) for e in bundle.bundle_member_entries)
 
     errors.extend(ValidationError(f"{c} not found in bundle member entry list", "collection_not_declared") for c in collection_lidvids - bundle_member_lidvids)
     errors.extend(ValidationError(f"{b} was declared, but no collection is present", "declared collection not found", "warning") for b in bundle_member_lidvids - collection_lidvids)

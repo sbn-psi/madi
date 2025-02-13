@@ -23,13 +23,13 @@ def get_missing_collections(previous_bundles: List[pds4.BundleProduct], delta_bu
         raise Exception(f"Too many delta bundles: {len(delta_bundles)}")
     delta_bundle = delta_bundles[0]
     matching_bundles = [x for x in previous_bundles if x.lidvid().lid == delta_bundle.lidvid().lid]
-    delta_collection_lids = [lids.LidVid.parse(x.livdid_reference).lid for x in delta_bundle.label.bundle_member_entries]
+    delta_collection_lids = [lids.LidVid.parse(x.lidvid_reference).lid for x in delta_bundle.label.bundle_member_entries]
     logger.info(f"Known collections LIDs: {delta_collection_lids}")
     if len(matching_bundles):
         latest_previous_bundle = sorted(matching_bundles, key=lambda x: x.lidvid().vid, reverse=True)[0]
         lids.dataclass()
         missing_collections = [x for x in latest_previous_bundle.label.bundle_member_entries
-                               if lids.LidVid.parse(x.livdid_reference).lid not in delta_collection_lids]
+                               if lids.LidVid.parse(x.lidvid_reference).lid not in delta_collection_lids]
         logger.info(f"JAXA: Found the following missing collections: {missing_collections}")
         return missing_collections
     return []

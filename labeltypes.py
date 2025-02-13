@@ -117,7 +117,7 @@ class BundleMemberEntry:
     member_status: str
     reference_type: str
     lid_reference: str = None
-    livdid_reference: str = None
+    lidvid_reference: str = None
 
 
 @dataclass()
