@@ -4,6 +4,7 @@ import pds4
 import label
 import labeltypes
 import os.path
+import re
 from typing import Dict, Set, Iterable, List, Tuple
 
 from lids import Lid, LidVid
@@ -304,18 +305,34 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
     previous_label_filename = os.path.basename(previous_product.label_path)
     delta_label_filename = os.path.basename(delta_product.label_path)
 
-    if previous_label_filename != delta_label_filename:
+    if not filename_matches(previous_label_filename, delta_label_filename):
         errors.append(ValidationError(
             f"New product has inconsistent label filename. Was: {previous_label_filename}, Now: {delta_label_filename}", "product_inconsistent_filenames"))
     else:
-        logger.info(f"Label Filename check for {delta_product.lidvid()}: OK. Filename: {delta_label_filename}")
+        logger.info(f"Label Filename check for {delta_product.lidvid()}: OK. Original Filename: {previous_label_filename}, Delta Filename: {delta_label_filename}")
 
     previous_data_filenames = set(os.path.basename(x) for x in previous_product.data_paths)
     delta_data_filenames = set(os.path.basename(x) for x in delta_product.data_paths)
 
-    if previous_data_filenames != delta_data_filenames:
+    previous_unversioned_filenames = set(unversioned_filename(x) for x in previous_data_filenames)
+    delta_unversioned_filenames = set(unversioned_filename(x) for x in delta_data_filenames)
+
+    if previous_unversioned_filenames != delta_unversioned_filenames:
         errors.append(ValidationError(
             f"New product has inconsistent data filenames. Was: {','.join(previous_data_filenames)}, Now: {','.join(delta_data_filenames)}", "data_inconsistent_filename"))
     else:
         logger.info(f"Data filename check for {delta_product.lidvid()}: OK. Filenames: {','.join(delta_data_filenames)}")
     return errors
+
+
+def filename_matches(previous_filename: str, delta_filename: str):
+    return unversioned_filename(previous_filename) == unversioned_filename(delta_filename)
+
+
+def unversioned_filename(filename: str):
+    root, ext = os.path.splitext(filename)
+    unversioned_root = re.sub('_?[vV]?[0-9](\.[0-9])*$', '', root) #root.rstrip('0123456789.').rstrip('vV_')
+    logger.info(f'Removed version information from {filename}: {unversioned_root}')
+    if ext:
+        return unversioned_root + '.' + ext
+    return unversioned_root
