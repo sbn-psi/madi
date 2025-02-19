@@ -314,7 +314,10 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
     previous_data_filenames = set(os.path.basename(x) for x in previous_product.data_paths)
     delta_data_filenames = set(os.path.basename(x) for x in delta_product.data_paths)
 
-    if previous_data_filenames != delta_data_filenames:
+    previous_unversioned_filenames = set(unversioned_filename(x) for x in previous_data_filenames)
+    delta_unversioned_filenames = set(unversioned_filename(x) for x in delta_data_filenames)
+
+    if previous_unversioned_filenames != delta_unversioned_filenames:
         errors.append(ValidationError(
             f"New product has inconsistent data filenames. Was: {','.join(previous_data_filenames)}, Now: {','.join(delta_data_filenames)}", "data_inconsistent_filename"))
     else:
