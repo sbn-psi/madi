@@ -304,7 +304,7 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
     previous_label_filename = os.path.basename(previous_product.label_path)
     delta_label_filename = os.path.basename(delta_product.label_path)
 
-    if previous_label_filename != delta_label_filename:
+    if not filename_matches(previous_label_filename, delta_label_filename):
         errors.append(ValidationError(
             f"New product has inconsistent label filename. Was: {previous_label_filename}, Now: {delta_label_filename}", "product_inconsistent_filenames"))
     else:
@@ -319,3 +319,16 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
     else:
         logger.info(f"Data filename check for {delta_product.lidvid()}: OK. Filenames: {','.join(delta_data_filenames)}")
     return errors
+
+
+def filename_matches(previous_filename: str, delta_filename: str):
+    return unversioned_filename(previous_filename) == unversioned_filename(delta_filename)
+
+
+def unversioned_filename(filename: str):
+    root, ext = os.path.splitext(filename)
+    unversioned_root = root.rstrip('0123456789.').rstrip('vV_')
+    logger.info(f'Removed version information from {filename}: {unversioned_root}')
+    if ext:
+        return unversioned_root + '.' + ext
+    return unversioned_root
