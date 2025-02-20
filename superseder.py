@@ -245,6 +245,7 @@ def copy_previously_superseded_products(
     Copies products that have already been superseded to a new directory. Since these have already been superseded,
     no manipulations to their path should be necessary.
     """
+    logger.info(f"Copying already-superseded products from {old_base} to {new_base}")
     for bundle in bundles:
         copy_to_path(bundle.label_path, paths.relocate_path(bundle.label_path, old_base, new_base), dry)
     for collection in collections:
@@ -275,6 +276,7 @@ def do_copy_inventory(collections: Iterable[pds4.Pds4Product], old_base, new_bas
     """
     Copies the collection inventories of a collection product to a new directory
     """
+    logger.info(f"Copying inventories from {old_base} to {new_base}")
     for c in collections:
         if isinstance(c, pds4.CollectionProduct):
             d = c.inventory_path
@@ -290,6 +292,7 @@ def do_copy_data(products: Iterable[pds4.Pds4Product], old_base, new_base, dry: 
     """
     Copies the data files of a basic product to another directory
     """
+    logger.info(f"Copying data from {old_base} to {new_base}")
     for p in products:
         if isinstance(p, pds4.BasicProduct):
             for d in p.data_paths:
@@ -305,6 +308,7 @@ def do_copy_readme(products: Iterable[pds4.BundleProduct], old_base, new_base, s
     """
     Copies the readme file of a bundle product to another directory
     """
+    logger.info(f"Copying readme from {old_base} to {new_base}")
     for p in products:
         if p.readme_path:
             vid = p.lidvid().vid
