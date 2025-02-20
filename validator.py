@@ -305,6 +305,9 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
     previous_label_filename = os.path.basename(previous_product.label_path)
     delta_label_filename = os.path.basename(delta_product.label_path)
 
+    if previous_label_filename != delta_label_filename:
+        errors.append(ValidationError(f"New product filename has a different version from previous product. Was: {previous_label_filename}, Now: {delta_label_filename}", "product_filename_version_differs", "warning"))
+
     if not filename_matches(previous_label_filename, delta_label_filename):
         errors.append(ValidationError(
             f"New product has inconsistent label filename. Was: {previous_label_filename}, Now: {delta_label_filename}", "product_inconsistent_filenames"))
@@ -316,6 +319,10 @@ def _do_check_filename_consistency(previous_product: pds4.BasicProduct, delta_pr
 
     previous_unversioned_filenames = set(unversioned_filename(x) for x in previous_data_filenames)
     delta_unversioned_filenames = set(unversioned_filename(x) for x in delta_data_filenames)
+
+    if previous_data_filenames != delta_data_filenames:
+        errors.append(ValidationError(
+            f"New product data filenames have a different version from previous product. Was: {','.join(previous_data_filenames)}, Now: {','.join(delta_data_filenames)}", "data_filename_version_differs", "warning"))
 
     if previous_unversioned_filenames != delta_unversioned_filenames:
         errors.append(ValidationError(
