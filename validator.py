@@ -331,7 +331,7 @@ def filename_matches(previous_filename: str, delta_filename: str):
 
 def unversioned_filename(filename: str):
     root, ext = os.path.splitext(filename)
-    unversioned_root = re.sub('_?[vV]?[0-9](\.[0-9])*$', '', root) #root.rstrip('0123456789.').rstrip('vV_')
+    unversioned_root = re.sub('_?[vV]?[0-9](\\.[0-9])*$', '', root)
     logger.info(f'Removed version information from {filename}: {unversioned_root}')
     if ext:
         return unversioned_root + '.' + ext
