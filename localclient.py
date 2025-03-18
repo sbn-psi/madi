@@ -1,6 +1,7 @@
 import hashlib
 import itertools
 import os
+import logging
 from typing import Iterable
 
 import bs4
@@ -11,12 +12,16 @@ from labeltypes import ProductLabel
 
 from pds4 import CollectionProduct, BundleProduct, BasicProduct, CollectionInventory
 
+logger = logging.getLogger(__name__)
+
 
 def fetchcollection(path: str) -> CollectionProduct:
     """Retrieves a collection product located at the specified path"""
+    logger.debug(f"Parsing collection: {path}")
     collection_label = fetchlabel(path)
     inventory_path = os.path.join(os.path.dirname(path), collection_label.file_areas[0].file_name)
     with open(inventory_path, newline="") as f:
+        logger.debug(f"Parsing collection inventory: {inventory_path}")
         inventory = CollectionInventory.from_csv(f.read())
     return CollectionProduct(collection_label, inventory, label_path=path, inventory_path=inventory_path)
 
