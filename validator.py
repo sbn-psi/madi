@@ -222,6 +222,14 @@ def _check_for_modification_history(lbl: label.ProductLabel) -> List[ValidationE
 
     return errors
 
+
+def _extract_vid(m: labeltypes.ModificationDetail) -> Tuple[int, int]:
+    tokens = m.version_id.split(".")
+    if len(tokens):
+        return int(tokens[0]), int(tokens[1])
+    raise Exception(f"Could not parse vid: {m.version_id}")
+
+
 def _check_for_preserved_modification_history(previous_collection: label.ProductLabel,
                                               delta_collection: label.ProductLabel) -> List[ValidationError]:
     """
@@ -230,8 +238,8 @@ def _check_for_preserved_modification_history(previous_collection: label.Product
     errors = []
     logger.info(f'Checking consistency of modification history for {delta_collection.identification_area.lidvid} against {previous_collection.identification_area.lidvid}')
 
-    previous_details = sorted(previous_collection.identification_area.modification_history.modification_details, key=operator.attrgetter("version_id"))
-    delta_details = sorted(delta_collection.identification_area.modification_history.modification_details, key=operator.attrgetter("version_id"))
+    previous_details = sorted(previous_collection.identification_area.modification_history.modification_details, key=_extract_vid)
+    delta_details = sorted(delta_collection.identification_area.modification_history.modification_details, key=_extract_vid)
 
     delta_lidvid = delta_collection.identification_area.lidvid
     prev_lidvid = previous_collection.identification_area.lidvid
