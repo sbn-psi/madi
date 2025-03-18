@@ -20,9 +20,14 @@ def fetchcollection(path: str) -> CollectionProduct:
     logger.debug(f"Parsing collection: {path}")
     collection_label = fetchlabel(path)
     inventory_path = os.path.join(os.path.dirname(path), collection_label.file_areas[0].file_name)
-    with open(inventory_path, newline="") as f:
-        logger.debug(f"Parsing collection inventory: {inventory_path}")
-        inventory = CollectionInventory.from_csv(f.read())
+    if "SUPERSEDED" in path:
+        logger.debug(f"Skipping inventory for superseded product: {inventory_path}")
+        inventory = None
+    else:
+        with open(inventory_path, newline="") as f:
+            logger.debug(f"Parsing collection inventory: {inventory_path}")
+            inventory = CollectionInventory.from_csv(f.read())
+
     return CollectionProduct(collection_label, inventory, label_path=path, inventory_path=inventory_path)
 
 
