@@ -1,3 +1,5 @@
+import os.path
+
 import localclient
 import logging
 import pds4
@@ -46,7 +48,7 @@ def is_collection(filepath: str) -> bool:
     :param filepath:
     :return:
     """
-    return "collection" in filepath
+    return os.path.basename(filepath).startswith("collection")
 
 
 def is_bundle(filepath: str) -> bool:
@@ -55,7 +57,7 @@ def is_bundle(filepath: str) -> bool:
     :param filepath:
     :return:
     """
-    return "bundle" in filepath
+    return os.path.basename(filepath).startswith("bundle")
 
 
 def is_superseded(filepath: str) -> bool:
