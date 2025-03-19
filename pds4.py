@@ -55,7 +55,7 @@ class CollectionInventory:
         if lid in self.items:
             previous = self.items[lid]
             if previous.lidvid.vid >= item.lidvid.vid:
-                raise Exception("Product is not newer than the version that already exists in the inventory")
+                raise Exception(f"Product {item.lidvid} is not newer than the version that already exists in the inventory {previous.lidvid}")
         self.items[lid] = item
 
     def products(self) -> set[LidVid]:
